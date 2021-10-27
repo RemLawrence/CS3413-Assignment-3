@@ -17,12 +17,12 @@
 #define PLAYER_H
 
 #define PLAYER_ANIM_TILES 3
-#define PLAYER_ANIM_TICKS 50
+#define PLAYER_ANIM_TICKS 30
 #define PLAYER_WIDTH 3 
-#define PLAYER_HEIGHT 3 
+#define PLAYER_HEIGHT 4 
 
 #include "console.h"
-//#include "threadwrappers.h"
+#include "threadwrappers.h"
 #include "centipede.h"
 #include <pthread.h>
 #include <stdbool.h>
@@ -31,9 +31,9 @@
 
 typedef enum playerState_enum 
 {
-	GAME,
-	DEAD,
-	GAMEOVER
+	GAME, // In game
+	DEAD, // Player dead
+	GAMEOVER // player win
 } playerState; 
 
 typedef struct player_struct 

@@ -16,15 +16,18 @@
 //feel free to use this or make your own
 char* playerGraphic[PLAYER_ANIM_TILES][PLAYER_HEIGHT] = 
 {
-    {"/o\\",
-     "|||",
-     "/^\\"},
-    {"/|\\",
-     "-o-",
-     "/^\\"},
-    {"/|\\",
-     "|||",
-     "/o\\"}
+    {"/T_T\\",
+     "|-o-|",
+     "/***\\",
+	 "|||||"},
+    {"/UwU\\",
+     "|o--|",
+     "/***\\",
+	 "|||||"},
+    {"/OvO\\",
+     "|--o|",
+     "/***\\",
+	 "|||||"}
 };
 
 /********************support functions***************/
@@ -70,6 +73,7 @@ player* spawnPlayer(int startRow, int startCol, int lives)
 void *runPlayerT(void *data) 
 {
 	player* p = (player*)data;
+	/* RESET the player state to start */
 	newPlayer(p);
 	
 	while (p->running && p->lives >= 0) 
@@ -84,6 +88,7 @@ void *runPlayerT(void *data)
 				;
 		}
 
+		// Make the spaceship animation
 		p->animTile++;
 		p->animTile %= PLAYER_ANIM_TILES;
 		playerRedraw(p, true);

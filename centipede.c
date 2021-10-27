@@ -79,8 +79,8 @@ void centipedeRun()
 {
 	if (consoleInit(GAME_ROWS, GAME_COLS, GAME_BOARD))
         {
-                //initialize player on the screen
-                player *p = spawnPlayer(20, 42, 0);
+                //initialize player on the screen. startRow=20, startColumn=36, lives=4
+                player *p = spawnPlayer(20, 36, 4);
                 
                 //above, initialize all the threads you need
                 //below, you should make a "gameplay loop" that manages screen drawing
@@ -89,9 +89,9 @@ void centipedeRun()
 
                 //animate an "enemy" made of numbers on the screen every second for 10s
                 //this isn't part of my solution, but is for illustration purposes
-		for (int i = 0; i<10; i++)
+		for (int i = 0; i<100; i++)
 		{
-			char** tile = ENEMY_BODY[i%ENEMY_BODY_ANIM_TILES];
+		        char** tile = ENEMY_BODY[i%ENEMY_BODY_ANIM_TILES];
 
                         //probably not threadsafe here...
                         //start centipede at tile 10, 10, move it horizontally once a frame/tick

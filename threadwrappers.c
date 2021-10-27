@@ -20,8 +20,7 @@ int statusCheck(int s)
 	return s;
 }
 
-int wrappedPthreadCreate(pthread_t *thread, const pthread_attr_t *attr,
-                          void *(*start_routine) (void *), void *arg)
+int wrappedPthreadCreate(pthread_t *thread, const pthread_attr_t *attr, void *(*start_routine) (void *), void *arg)
 {
 	return statusCheck(pthread_create(thread, attr, start_routine, arg));
 }

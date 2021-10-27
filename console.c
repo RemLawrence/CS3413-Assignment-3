@@ -24,6 +24,7 @@ static bool checkConsoleSize(int reqHeight, int reqWidth)
   return(true);
 }
 
+/* Return success if the console dimension meets requirement */
 bool consoleInit(int height, int width, char* board[]) {
     bool status;
 
@@ -162,6 +163,7 @@ void sleepTicks(int ticks)
   if (ticks <= 0)
     return;
 
+// Sleep for this amount of ticks (for player for now)
   struct timespec rqtp = getTimeout(ticks);
   nanosleep(&rqtp, NULL);
 }
