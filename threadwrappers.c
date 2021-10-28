@@ -32,25 +32,25 @@ int wrappedPthreadJoin(pthread_t thread, void **retval) {
 
 
 int wrappedMutexInit(pthread_mutex_t *mutex, const pthread_mutexattr_t *mutexattr) {
-	return statusCheck(pthread_mutex_init(&mutex, mutexattr));
+	return statusCheck(pthread_mutex_init(mutex, mutexattr));
 }
 
 int wrappedMutexLock(pthread_mutex_t *mutex) {
-	return statusCheck(pthread_mutex_lock(&mutex));
+	return statusCheck(pthread_mutex_lock(mutex));
 }
 
 int wrappedMutexUnlock(pthread_mutex_t *mutex) {
-	return statusCheck(pthread_mutex_unlock(&mutex));
+	return statusCheck(pthread_mutex_unlock(mutex));
 }
 
 
 
 int wrappedCondSignal(pthread_cond_t *cond) {
-	return statusCheck(pthread_cond_signal(&cond));
+	return statusCheck(pthread_cond_signal(cond));
 }
 
 int wrappedCondWait(pthread_cond_t *cond, pthread_mutex_t *mutex) {
-	return statusCheck(pthread_cond_wait(&cond, &mutex));
+	return statusCheck(pthread_cond_wait(cond, mutex));
 }
 
 /*
