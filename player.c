@@ -18,12 +18,12 @@ char* playerGraphic[PLAYER_ANIM_TILES][PLAYER_HEIGHT] =
 {
     {"/T_T\\",
      "|-o-|",
-     "/***\\",
+     "/*^*\\",
 	 "|||||"},
     {"/UwU\\",
      "|o--|",
      "/***\\",
-	 "|||||"},
+	 "||||"},
     {"/OvO\\",
      "|--o|",
      "/***\\",
@@ -45,8 +45,10 @@ void _playerRedrawMoved(player *p, int prevRow, int prevCol, bool lock)
 	//TODO
 	//Dear students, this function is NOT THREAD SAFE and will require fixing
 	//TODO: lock screen (critical shared resource)
+	wrappedMutexlock(&p->mutex);
 	consoleClearImage(prevRow, prevCol, PLAYER_HEIGHT, PLAYER_WIDTH);
 	consoleDrawImage(p->row, p->col, playerGraphic[p->animTile], PLAYER_HEIGHT);
+	wrappedMutexUnlock(&p->mutex);
 	//TODO: unlock screen
 }
 
@@ -66,12 +68,14 @@ player* spawnPlayer(int startRow, int startCol, int lives)
 	p->running = true;
 
 	//TODO: Init mutex...
+	wrappedMutexInit(&p->mutex, NULL);
 	wrappedPthreadCreate(&(p->thread), NULL, runPlayerT, (void*)p);
 	return p;
 }
 
 void *runPlayerT(void *data) 
 {
+	// Pass the reference to the player p
 	player* p = (player*)data;
 	/* RESET the player state to start */
 	newPlayer(p);
@@ -82,17 +86,23 @@ void *runPlayerT(void *data)
 		switch(p->state) 
 		{
 			case DEAD:
+				wrappedMutexLock(&p->mutex);
 				p->lives--;
+				wrappedMutexUnlock(&p->mutex);
 				//...other code here...
 			default:
 				;
 		}
 
 		// Make the spaceship animation
+		wrappedMutexLock(&p->mutex);
 		p->animTile++;
 		p->animTile %= PLAYER_ANIM_TILES;
+		wrappedMutexUnlock(&p->mutex);
+
 		playerRedraw(p, true);
 		sleepTicks(PLAYER_ANIM_TICKS);
+		
 	}
 	return NULL;
 }

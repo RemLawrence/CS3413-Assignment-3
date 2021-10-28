@@ -25,6 +25,34 @@ int wrappedPthreadCreate(pthread_t *thread, const pthread_attr_t *attr, void *(*
 	return statusCheck(pthread_create(thread, attr, start_routine, arg));
 }
 
+int wrappedPthreadJoin(pthread_t thread, void **retval) {
+	return statusCheck(pthread_join(thread, retval));
+}
+
+
+
+int wrappedMutexInit(pthread_mutex_t *mutex, const pthread_mutexattr_t *mutexattr) {
+	return statusCheck(pthread_mutex_init(&mutex, mutexattr));
+}
+
+int wrappedMutexLock(pthread_mutex_t *mutex) {
+	return statusCheck(pthread_mutex_lock(&mutex));
+}
+
+int wrappedMutexUnlock(pthread_mutex_t *mutex) {
+	return statusCheck(pthread_mutex_unlock(&mutex));
+}
+
+
+
+int wrappedCondSignal(pthread_cond_t *cond) {
+	return statusCheck(pthread_cond_signal(&cond));
+}
+
+int wrappedCondWait(pthread_cond_t *cond, pthread_mutex_t *mutex) {
+	return statusCheck(pthread_cond_wait(&cond, &mutex));
+}
+
 /*
 add other helper functions here like 
 

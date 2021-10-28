@@ -54,6 +54,7 @@ char *GAME_BOARD[] = {
 #define ENEMY_HEIGHT 2
 #define ENEMY_WIDTH 1
 #define ENEMY_BODY_ANIM_TILES 4 
+#define NUM_THREADS 1
 char* ENEMY_BODY[ENEMY_BODY_ANIM_TILES][ENEMY_HEIGHT] = 
 {
   {"1",
@@ -89,7 +90,8 @@ void centipedeRun()
 
                 //animate an "enemy" made of numbers on the screen every second for 10s
                 //this isn't part of my solution, but is for illustration purposes
-		for (int i = 0; i<100; i++)
+		int i = 0;
+                while(p->lives >= 0)
 		{
 		        char** tile = ENEMY_BODY[i%ENEMY_BODY_ANIM_TILES];
 
@@ -101,6 +103,7 @@ void centipedeRun()
 			consoleDrawImage(10, 10+i, tile, ENEMY_HEIGHT);
 			consoleRefresh(); //draw everything to screen.
 			sleepTicks(60);
+                        i++;
 		}		
 
                 //note after this the player thread keeps running and isn't cleaned
