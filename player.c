@@ -45,7 +45,7 @@ void _playerRedrawMoved(player *p, int prevRow, int prevCol, bool lock)
 	//TODO
 	//Dear students, this function is NOT THREAD SAFE and will require fixing
 	//TODO: lock screen (critical shared resource)
-	wrappedMutexlock(&p->mutex);
+	wrappedMutexLock(&p->mutex);
 	consoleClearImage(prevRow, prevCol, PLAYER_HEIGHT, PLAYER_WIDTH);
 	consoleDrawImage(p->row, p->col, playerGraphic[p->animTile], PLAYER_HEIGHT);
 	wrappedMutexUnlock(&p->mutex);
