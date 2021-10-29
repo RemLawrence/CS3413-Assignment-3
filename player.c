@@ -83,7 +83,7 @@ void *runPlayerT(void *data)
 	while (p->running && p->lives >= 0) 
 	{
 		//TODO: not threadsafe!!!!
-		switch(p->state) 
+		switch(p->state)
 		{
 			case DEAD:
 				wrappedMutexLock(&p->mutex);

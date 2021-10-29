@@ -20,7 +20,7 @@
 #include "console.h"
 #include "centipede.h"
 #include "player.h"
-
+#include "keyboard.h"
 
 void centipedeRun();
 

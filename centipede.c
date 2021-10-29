@@ -82,6 +82,9 @@ void centipedeRun()
         {
                 //initialize player on the screen. startRow=20, startColumn=36, lives=4
                 player *p = spawnPlayer(20, 36, 4);
+
+                //initialize keyboard and its thread
+                keyboard *k = initKeyboard();
                 
                 //above, initialize all the threads you need
                 //below, you should make a "gameplay loop" that manages screen drawing
@@ -112,6 +115,7 @@ void centipedeRun()
                 finalKeypress(); /* wait for final key before killing curses and game */
                 p->running = false;
                 pthread_join(p->thread, NULL);
+                pthread_join(k->thread, NULL);
         }       
         
         consoleFinish();        	
