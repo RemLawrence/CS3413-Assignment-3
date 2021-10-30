@@ -55,7 +55,6 @@ void _playerRedrawMoved(player *p, int prevRow, int prevCol, bool lock)
 		// printf("p->row%d\n", p->row);
 		// printf("p->col%d\n", p->col);
 		consoleDrawImage(p->row, p->col, playerGraphic[p->animTile], PLAYER_HEIGHT);
-		consoleRefresh();
 		wrappedMutexUnlock(&p->mutex);
 	}
 	//TODO: unlock screen
@@ -111,6 +110,7 @@ void *runPlayerT(void *data)
 
 		playerRedraw(p, true);
 		sleepTicks(PLAYER_ANIM_TICKS);
+		consoleRefresh();
 		
 	}
 	return NULL;
