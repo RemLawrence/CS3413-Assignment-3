@@ -14,9 +14,12 @@
 
 **********************************************************************/
 #include "centipede.h"
+#include "player.h"
 #include <string.h>
 #include <unistd.h>
 #include <pthread.h>
+#include "stdio.h"
+#include <sys/select.h>
 
 
 //all these constants and gameboard should probably go in a constants file...hint hint
@@ -67,13 +70,59 @@ char* ENEMY_BODY[ENEMY_BODY_ANIM_TILES][ENEMY_HEIGHT] =
    "4"}
 };
 
+#define KEY_W_PREESSED 'w'
+#define KEY_A_PREESSED 'a'
+#define KEY_S_PREESSED 's'
+#define KEY_D_PREESSED 'd'
 
+pthread_mutex_t keyboard_mutex;
 
 //the rest will hold the main game engine
 //it's likely you'll add quite a bit to it (input, cleanup, synchronization, etc)
 
 //you'll probably want a sort of globally accessible function to the player, enemy, etc
 //to control screen locking here.
+
+void *runKeyboard(void* data) {
+
+    fd_set rfds;
+    struct timeval tv;
+    int retval;
+
+    /* Watch stdin (fd 0 to see when it has input. */
+    FD_ZERO(&rfds);
+    FD_SET(0, &rfds);
+
+    /* Wait up to 1 seconds. */
+    wrappedMutexLock(&keyboard_mutex);
+    tv.tv_sec = 1;
+    tv.tv_usec = 0;
+    wrappedMutexUnlock(&keyboard_mutex);
+
+    while(1) {
+        retval = select(1, &rfds, NULL, NULL, &tv);
+        if (retval == -1) {
+            perror("select()");
+            exit(EXIT_FAILURE);
+        }
+        else {
+            /* FD_ISSET(0, &rfds) is true so input is available now. */
+            char input;
+            input = getchar();
+            putchar(input);
+
+            if(input == KEY_A_PREESSED){
+
+            }
+            
+            
+            //TODO: CHECK IF GAME IS OVER? If over, before blocking 
+            //again, quit the thread
+        }
+    }
+
+    return NULL;
+}
 
 // THE MAIN, ULTIMATE GAME ENGINE
 void centipedeRun()
@@ -83,9 +132,10 @@ void centipedeRun()
                 //initialize player on the screen. startRow=20, startColumn=36, lives=4
                 player *p = spawnPlayer(20, 36, 4);
 
-
                 //initialize keyboard and its thread
-                keyboard *k = initKeyboard(p);
+                pthread_t keyboard_thread;
+                wrappedMutexInit(&keyboard_mutex, NULL);
+                wrappedPthreadCreate(&(keyboard_thread), NULL, runKeyboard, (void*)p);
                 
                 //above, initialize all the threads you need
                 //below, you should make a "gameplay loop" that manages screen drawing
@@ -116,7 +166,7 @@ void centipedeRun()
                 finalKeypress(); /* wait for final key before killing curses and game */
                 p->running = false;
                 pthread_join(p->thread, NULL);
-                pthread_join(k->thread, NULL);
+                pthread_join(keyboard_thread, NULL);
         }       
         
         consoleFinish();        	
