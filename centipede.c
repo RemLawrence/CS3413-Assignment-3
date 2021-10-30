@@ -74,6 +74,7 @@ char* ENEMY_BODY[ENEMY_BODY_ANIM_TILES][ENEMY_HEIGHT] =
 #define KEY_A_PREESSED 'a'
 #define KEY_S_PREESSED 's'
 #define KEY_D_PREESSED 'd'
+#define KEY_Q_PREESSED 'q'
 
 pthread_mutex_t keyboard_mutex;
 
@@ -84,6 +85,9 @@ pthread_mutex_t keyboard_mutex;
 //to control screen locking here.
 
 void *runKeyboard(void* data) {
+
+    // Pass the reference to the player p
+    player* p = (player*)data;
 
     fd_set rfds;
     struct timeval tv;
@@ -109,17 +113,40 @@ void *runKeyboard(void* data) {
             /* FD_ISSET(0, &rfds) is true so input is available now. */
             char input;
             input = getchar();
-            putchar(input);
+                
+            int prevRow = p->row;
+            int prevCol = p->col;
 
-            if(input == KEY_A_PREESSED){
-
+            switch(input) {
+                case KEY_W_PREESSED:
+                        p->row = p->row - 1;
+                        playerMove(p, prevRow, prevCol);
+                        break;
+                case KEY_A_PREESSED:
+                        p->col = p->col - 1;
+                        playerMove(p, prevRow, prevCol);
+                        break;
+                case KEY_S_PREESSED:
+                        p->row = p->row + 1;
+                        playerMove(p, prevRow, prevCol);
+                        break;
+                case KEY_D_PREESSED:
+                        p->col = p->col + 1;
+                        playerMove(p, prevRow, prevCol);
+                        break;
+                case KEY_Q_PREESSED:
+                        putBanner("quitter....");
+                        break;
+                default:
+                        break;
             }
-            
+            consoleRefresh();
             
             //TODO: CHECK IF GAME IS OVER? If over, before blocking 
             //again, quit the thread
         }
     }
+    putBanner("game over...Do, or do not.. there is no try!");
 
     return NULL;
 }
@@ -132,10 +159,15 @@ void centipedeRun()
                 //initialize player on the screen. startRow=20, startColumn=36, lives=4
                 player *p = spawnPlayer(20, 36, 4);
 
-                //initialize keyboard and its thread
+                //initialize keyboard thread
                 pthread_t keyboard_thread;
                 wrappedMutexInit(&keyboard_mutex, NULL);
                 wrappedPthreadCreate(&(keyboard_thread), NULL, runKeyboard, (void*)p);
+
+                //initialize redraw/refresh thread
+                // pthread_t refresh_thread;
+                // wrappedMutexInit(&keyboard_mutex, NULL);
+                // wrappedPthreadCreate(&(keyboard_thread), NULL, runKeyboard, (void*)p);
                 
                 //above, initialize all the threads you need
                 //below, you should make a "gameplay loop" that manages screen drawing
@@ -155,7 +187,7 @@ void centipedeRun()
                         //then drawing it in the new location. 
                         consoleClearImage(10, 10+i-1, ENEMY_HEIGHT, ENEMY_WIDTH);
 			consoleDrawImage(10, 10+i, tile, ENEMY_HEIGHT);
-			consoleRefresh(); //draw everything to screen.
+			//consoleRefresh(); //draw everything to screen.
 			sleepTicks(60);
                         i++;
 		}		
@@ -169,6 +201,7 @@ void centipedeRun()
                 pthread_join(keyboard_thread, NULL);
         }       
         
-        consoleFinish();        	
+        consoleFinish();
+        
 }
 

@@ -65,6 +65,10 @@ void playerRedraw(player *p, bool lock)
 	_playerRedrawMoved(p, p->row, p->col, lock);
 }
 
+void playerMove(player *f, int dRow, int dCol) {
+	_playerRedrawMoved(f, dRow, dCol, true);
+}
+
 /********************THREAD functions***************/
 
 player* spawnPlayer(int startRow, int startCol, int lives)
