@@ -26,7 +26,7 @@ main.o: main.c centipede.h
 player.o: player.c player.h centipede.h console.h threadwrappers.h
 	$(CC) $(CFLAGS) -c player.c
 
-keyboard.o: keyboard.c keyboard.h centipede.h console.h threadwrappers.h
+keyboard.o: keyboard.c keyboard.h player.h centipede.h console.h threadwrappers.h
 	$(CC) $(CFLAGS) -c keyboard.c
 
 console.o: console.c console.h

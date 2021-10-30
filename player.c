@@ -11,6 +11,8 @@
 **********************************************************************/
 
 #include "player.h"
+#include <stdio.h>
+#include <curses.h>
 
 //sample player graphic, 3 tile animation.
 //feel free to use this or make your own
@@ -23,7 +25,7 @@ char* playerGraphic[PLAYER_ANIM_TILES][PLAYER_HEIGHT] =
     {"/UwU\\",
      "|o--|",
      "/***\\",
-	 "||||"},
+	 "|||||"},
     {"/OvO\\",
      "|--o|",
      "/***\\",
@@ -45,10 +47,17 @@ void _playerRedrawMoved(player *p, int prevRow, int prevCol, bool lock)
 	//TODO
 	//Dear students, this function is NOT THREAD SAFE and will require fixing
 	//TODO: lock screen (critical shared resource)
-	wrappedMutexLock(&p->mutex);
-	consoleClearImage(prevRow, prevCol, PLAYER_HEIGHT, PLAYER_WIDTH);
-	consoleDrawImage(p->row, p->col, playerGraphic[p->animTile], PLAYER_HEIGHT);
-	wrappedMutexUnlock(&p->mutex);
+	if(lock) {
+		wrappedMutexLock(&p->mutex);
+		consoleClearImage(prevRow, prevCol, PLAYER_HEIGHT, PLAYER_WIDTH);
+		// printf("prevRow%d\n", prevRow);
+		// printf("prevCol%d\n", prevCol);
+		// printf("p->row%d\n", p->row);
+		// printf("p->col%d\n", p->col);
+		consoleDrawImage(p->row, p->col, playerGraphic[p->animTile], PLAYER_HEIGHT);
+		consoleRefresh();
+		wrappedMutexUnlock(&p->mutex);
+	}
 	//TODO: unlock screen
 }
 

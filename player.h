@@ -23,7 +23,6 @@
 
 #include "console.h"
 #include "threadwrappers.h"
-#include "centipede.h"
 #include <pthread.h>
 #include <stdbool.h>
 #include <stdlib.h>
