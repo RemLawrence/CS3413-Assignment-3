@@ -77,6 +77,7 @@ char* ENEMY_BODY[ENEMY_BODY_ANIM_TILES][ENEMY_HEIGHT] =
 #define KEY_Q_PREESSED 'q'
 
 pthread_mutex_t keyboard_mutex;
+pthread_mutex_t refresh_mutex;
 
 //the rest will hold the main game engine
 //it's likely you'll add quite a bit to it (input, cleanup, synchronization, etc)
@@ -140,7 +141,6 @@ void *runKeyboard(void* data) {
                 default:
                         break;
             }
-            consoleRefresh();
             
             //TODO: CHECK IF GAME IS OVER? If over, before blocking 
             //again, quit the thread
@@ -149,6 +149,16 @@ void *runKeyboard(void* data) {
     putBanner("game over...Do, or do not.. there is no try!");
 
     return NULL;
+}
+
+void *runConsoleRefresh(void *data) {
+        while(1) {
+                wrappedMutexLock(&refresh_mutex);
+    
+                consoleRefresh();
+
+                wrappedMutexUnlock(&refresh_mutex);
+        }
 }
 
 // THE MAIN, ULTIMATE GAME ENGINE
@@ -165,9 +175,9 @@ void centipedeRun()
                 wrappedPthreadCreate(&(keyboard_thread), NULL, runKeyboard, (void*)p);
 
                 //initialize redraw/refresh thread
-                // pthread_t refresh_thread;
-                // wrappedMutexInit(&keyboard_mutex, NULL);
-                // wrappedPthreadCreate(&(keyboard_thread), NULL, runKeyboard, (void*)p);
+                pthread_t refresh_thread;
+                wrappedMutexInit(&refresh_mutex, NULL);
+                wrappedPthreadCreate(&(refresh_thread), NULL, runConsoleRefresh, (void*)p);
                 
                 //above, initialize all the threads you need
                 //below, you should make a "gameplay loop" that manages screen drawing
