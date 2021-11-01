@@ -75,6 +75,7 @@ char* ENEMY_BODY[ENEMY_BODY_ANIM_TILES][ENEMY_HEIGHT] =
 #define KEY_S_PREESSED 's'
 #define KEY_D_PREESSED 'd'
 #define KEY_Q_PREESSED 'q'
+#define PLAYER_BOUNDARY_ROW 17
 
 pthread_mutex_t keyboard_mutex;
 pthread_mutex_t refresh_mutex;
@@ -118,24 +119,28 @@ void *runKeyboard(void* data) {
 
             switch(input) {
                 case KEY_W_PREESSED:
-                        //wrappedMutexLock(&p->mutex);
-                        p->row = p->row - 1;
-                        //wrappedMutexUnlock(&p->mutex);
+                        // Upper boundary
+                        if(p->row > PLAYER_BOUNDARY_ROW) {
+                                p->row = p->row - 1;
+                        }
                         break;
                 case KEY_A_PREESSED:
-                        //wrappedMutexLock(&p->mutex);
-                        p->col = p->col - 1;
-                        //wrappedMutexUnlock(&p->mutex);
+                        // Left boundary
+                        if(p->col > 0) {
+                                p->col = p->col - 1;
+                        }
                         break;
                 case KEY_S_PREESSED:
-                        //wrappedMutexLock(&p->mutex);
-                        p->row = p->row + 1;
-                        //wrappedMutexUnlock(&p->mutex);
+                        // Right boundary
+                        if(p->row < GAME_ROWS-PLAYER_HEIGHT) {
+                                p->row = p->row + 1;
+                        }
                         break;
                 case KEY_D_PREESSED:
-                        //wrappedMutexLock(&p->mutex);
-                        p->col = p->col + 1;
-                        //wrappedMutexUnlock(&p->mutex);
+                        // Lower boundary
+                        if(p->col < GAME_COLS-PLAYER_WIDTH) {
+                                p->col = p->col + 1;
+                        }
                         break;
                 case KEY_Q_PREESSED:
                         putBanner("quitter....");
