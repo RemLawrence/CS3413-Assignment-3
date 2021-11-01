@@ -99,10 +99,8 @@ void *runKeyboard(void* data) {
     FD_SET(0, &rfds);
 
     /* Wait up to 1 seconds. */
-    wrappedMutexLock(&keyboard_mutex);
     tv.tv_sec = 1;
     tv.tv_usec = 0;
-    wrappedMutexUnlock(&keyboard_mutex);
 
     while(1) {
         retval = select(1, &rfds, NULL, NULL, &tv);
@@ -114,26 +112,30 @@ void *runKeyboard(void* data) {
             /* FD_ISSET(0, &rfds) is true so input is available now. */
             char input;
             input = getchar();
-                
+
             int prevRow = p->row;
             int prevCol = p->col;
 
             switch(input) {
                 case KEY_W_PREESSED:
+                        //wrappedMutexLock(&p->mutex);
                         p->row = p->row - 1;
-                        playerMove(p, prevRow, prevCol);
+                        //wrappedMutexUnlock(&p->mutex);
                         break;
                 case KEY_A_PREESSED:
+                        //wrappedMutexLock(&p->mutex);
                         p->col = p->col - 1;
-                        playerMove(p, prevRow, prevCol);
+                        //wrappedMutexUnlock(&p->mutex);
                         break;
                 case KEY_S_PREESSED:
+                        //wrappedMutexLock(&p->mutex);
                         p->row = p->row + 1;
-                        playerMove(p, prevRow, prevCol);
+                        //wrappedMutexUnlock(&p->mutex);
                         break;
                 case KEY_D_PREESSED:
+                        //wrappedMutexLock(&p->mutex);
                         p->col = p->col + 1;
-                        playerMove(p, prevRow, prevCol);
+                        //wrappedMutexUnlock(&p->mutex);
                         break;
                 case KEY_Q_PREESSED:
                         putBanner("quitter....");
@@ -141,9 +143,7 @@ void *runKeyboard(void* data) {
                 default:
                         break;
             }
-            
-            //TODO: CHECK IF GAME IS OVER? If over, before blocking 
-            //again, quit the thread
+                playerMove(p, prevRow, prevCol);
         }
     }
     putBanner("game over...Do, or do not.. there is no try!");
@@ -153,11 +153,9 @@ void *runKeyboard(void* data) {
 
 void *runConsoleRefresh(void *data) {
         while(1) {
-                wrappedMutexLock(&refresh_mutex);
     
                 consoleRefresh();
 
-                wrappedMutexUnlock(&refresh_mutex);
         }
 }
 
@@ -195,10 +193,10 @@ void centipedeRun()
                         //start centipede at tile 10, 10, move it horizontally once a frame/tick
                         //we create the illusion of movement by clearing the screen where the centipede was last
                         //then drawing it in the new location. 
-                        consoleClearImage(10, 10+i-1, ENEMY_HEIGHT, ENEMY_WIDTH);
-			consoleDrawImage(10, 10+i, tile, ENEMY_HEIGHT);
+                        //consoleClearImage(10, 10+i-1, ENEMY_HEIGHT, ENEMY_WIDTH);
+			//consoleDrawImage(10, 10+i, tile, ENEMY_HEIGHT);
 			//consoleRefresh(); //draw everything to screen.
-			sleepTicks(60);
+			//sleepTicks(60);
                         i++;
 		}		
 
@@ -209,6 +207,7 @@ void centipedeRun()
                 p->running = false;
                 pthread_join(p->thread, NULL);
                 pthread_join(keyboard_thread, NULL);
+                pthread_join(refresh_thread, NULL);
         }       
         
         consoleFinish();

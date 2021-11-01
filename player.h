@@ -18,7 +18,7 @@
 
 #define PLAYER_ANIM_TILES 3
 #define PLAYER_ANIM_TICKS 30
-#define PLAYER_WIDTH 3 
+#define PLAYER_WIDTH 5 
 #define PLAYER_HEIGHT 4 
 
 #include "console.h"

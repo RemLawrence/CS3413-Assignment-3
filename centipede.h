@@ -23,6 +23,8 @@
 
 void *runKeyboard(void *data);
 
+void *runConsoleRefresh(void *data);
+
 void centipedeRun();
 
 
