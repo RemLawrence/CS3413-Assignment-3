@@ -152,10 +152,11 @@ void *runKeyboard(void* data) {
 }
 
 void *runConsoleRefresh(void *data) {
+        player* p = (player*)data;
         while(1) {
-    
+                wrappedMutexLock(&p->mutex);
                 consoleRefresh();
-
+                wrappedMutexUnlock(&p->mutex);
         }
 }
 
