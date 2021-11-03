@@ -77,6 +77,7 @@ char* ENEMY_BODY[ENEMY_BODY_ANIM_TILES][ENEMY_HEIGHT] =
 #define KEY_Q_PREESSED 'q'
 #define PLAYER_BOUNDARY_ROW 17
 
+pthread_mutex_t screenLock; // Screen Lock (p->mutex now)
 pthread_mutex_t keyboard_mutex;
 pthread_mutex_t refresh_mutex;
 
@@ -131,19 +132,21 @@ void *runKeyboard(void* data) {
                         }
                         break;
                 case KEY_S_PREESSED:
-                        // Right boundary
+                        // Lower boundary
                         if(p->row < GAME_ROWS-PLAYER_HEIGHT) {
                                 p->row = p->row + 1;
                         }
                         break;
                 case KEY_D_PREESSED:
-                        // Lower boundary
+                        // Right boundary
                         if(p->col < GAME_COLS-PLAYER_WIDTH) {
                                 p->col = p->col + 1;
                         }
                         break;
                 case KEY_Q_PREESSED:
+                        wrappedMutexLock(&screenLock);
                         putBanner("quitter....");
+                        wrappedMutexUnlock(&screenLock);
                         break;
                 default:
                         break;
@@ -151,7 +154,9 @@ void *runKeyboard(void* data) {
                 playerMove(p, prevRow, prevCol);
         }
     }
+    wrappedMutexLock(&screenLock);
     putBanner("game over...Do, or do not.. there is no try!");
+    wrappedMutexUnlock(&screenLock);
 
     return NULL;
 }
@@ -159,9 +164,9 @@ void *runKeyboard(void* data) {
 void *runConsoleRefresh(void *data) {
         player* p = (player*)data;
         while(1) {
-                wrappedMutexLock(&p->mutex);
+                wrappedMutexLock(&screenLock);
                 consoleRefresh();
-                wrappedMutexUnlock(&p->mutex);
+                wrappedMutexUnlock(&screenLock);
         }
 }
 
@@ -170,8 +175,9 @@ void centipedeRun()
 {
 	if (consoleInit(GAME_ROWS, GAME_COLS, GAME_BOARD))
         {
+                wrappedMutexInit(&screenLock, NULL);
                 //initialize player on the screen. startRow=20, startColumn=36, lives=4
-                player *p = spawnPlayer(20, 36, 4);
+                player *p = spawnPlayer(20, 36, 4, &screenLock);
 
                 //initialize keyboard thread
                 pthread_t keyboard_thread;
@@ -193,7 +199,7 @@ void centipedeRun()
 		int i = 0;
                 while(p->lives >= 0)
 		{
-		        char** tile = ENEMY_BODY[i%ENEMY_BODY_ANIM_TILES];
+		        //char** tile = ENEMY_BODY[i%ENEMY_BODY_ANIM_TILES];
 
                         //probably not threadsafe here...
                         //start centipede at tile 10, 10, move it horizontally once a frame/tick
@@ -214,6 +220,8 @@ void centipedeRun()
                 pthread_join(p->thread, NULL);
                 pthread_join(keyboard_thread, NULL);
                 pthread_join(refresh_thread, NULL);
+
+                free(p);
         }       
         
         consoleFinish();
