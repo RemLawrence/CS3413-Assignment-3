@@ -15,6 +15,7 @@
 **********************************************************************/
 #include "centipede.h"
 #include "player.h"
+#include "enemy.h"
 #include <string.h>
 #include <unistd.h>
 #include <pthread.h>
@@ -53,23 +54,6 @@ char *GAME_BOARD[] = {
 "", 
 "" };
 
-
-#define ENEMY_HEIGHT 2
-#define ENEMY_WIDTH 1
-#define ENEMY_BODY_ANIM_TILES 4 
-#define NUM_THREADS 1
-char* ENEMY_BODY[ENEMY_BODY_ANIM_TILES][ENEMY_HEIGHT] = 
-{
-  {"1",
-   "1"},
-  {"2",
-   "2"},
-  {"3",
-   "3"},
-  {"4",
-   "4"}
-};
-
 #define KEY_W_PREESSED 'w'
 #define KEY_A_PREESSED 'a'
 #define KEY_S_PREESSED 's'
@@ -88,7 +72,6 @@ pthread_mutex_t refresh_mutex;
 //to control screen locking here.
 
 void *runKeyboard(void* data) {
-
     // Pass the reference to the player p
     player* p = (player*)data;
 
@@ -162,7 +145,7 @@ void *runKeyboard(void* data) {
 }
 
 void *runConsoleRefresh(void *data) {
-        player* p = (player*)data;
+        //player* p = (player*)data; unused
         while(1) {
                 wrappedMutexLock(&screenLock);
                 consoleRefresh();
@@ -175,7 +158,7 @@ void centipedeRun()
 {
 	if (consoleInit(GAME_ROWS, GAME_COLS, GAME_BOARD))
         {
-                wrappedMutexInit(&screenLock, NULL);
+                wrappedMutexInit(&screenLock, NULL); // Initialize screenLock
                 //initialize player on the screen. startRow=20, startColumn=36, lives=4
                 player *p = spawnPlayer(20, 36, 4, &screenLock);
 
@@ -188,40 +171,31 @@ void centipedeRun()
                 pthread_t refresh_thread;
                 wrappedMutexInit(&refresh_mutex, NULL);
                 wrappedPthreadCreate(&(refresh_thread), NULL, runConsoleRefresh, (void*)p);
+
+                //initialize enemy on the screen. startRow=0, startColumn=80
+                enemy *e = spawnEnemy(2, 80, &screenLock);
                 
                 //above, initialize all the threads you need
                 //below, you should make a "gameplay loop" that manages screen drawing
                 //that  waits on a condition variable until the game is over
                 //and coordinates all threads to end
 
-                //animate an "enemy" made of numbers on the screen every second for 10s
-                //this isn't part of my solution, but is for illustration purposes
-		int i = 0;
-                while(p->lives >= 0)
-		{
-		        //char** tile = ENEMY_BODY[i%ENEMY_BODY_ANIM_TILES];
-
-                        //probably not threadsafe here...
-                        //start centipede at tile 10, 10, move it horizontally once a frame/tick
-                        //we create the illusion of movement by clearing the screen where the centipede was last
-                        //then drawing it in the new location. 
-                        //consoleClearImage(10, 10+i-1, ENEMY_HEIGHT, ENEMY_WIDTH);
-			//consoleDrawImage(10, 10+i, tile, ENEMY_HEIGHT);
-			//consoleRefresh(); //draw everything to screen.
-			//sleepTicks(60);
-                        i++;
-		}		
+                	
 
                 //note after this the player thread keeps running and isn't cleaned
                 //up properly. Why don't we see it update on screen?
-                
-                finalKeypress(); /* wait for final key before killing curses and game */
+                while(1) {
+
+                }
+                //finalKeypress(); /* wait for final key before killing curses and game */
                 p->running = false;
                 pthread_join(p->thread, NULL);
                 pthread_join(keyboard_thread, NULL);
                 pthread_join(refresh_thread, NULL);
+                pthread_join(e->thread, NULL);
 
                 free(p);
+                free(e);
         }       
         
         consoleFinish();
