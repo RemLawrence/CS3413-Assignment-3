@@ -1,17 +1,18 @@
 #include "enemy.h"
 #include <stdio.h>
 #include <curses.h>
+#include <string.h>
 
-char* ENEMY_BODY[ENEMY_BODY_ANIM_TILES][ENEMY_HEIGHT] = 
+char* ENEMY_BODY_LEFT[ENEMY_BODY_ANIM_TILES][ENEMY_HEIGHT] = 
 {
-  {"1",
-   "1"},
-  {"2",
-   "2"},
-  {"3",
-   "3"},
-  {"4",
-   "4"}
+   {"@|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||",
+   "=;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,"},
+  {"@||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^",
+   "=;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;"},
+  {"@|^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|",
+   "=,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;"},
+  {"-^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^||",
+   "=;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;"}
 };
 
 /********************support functions***************/
@@ -26,7 +27,7 @@ void newEnemy(enemy *e)
 
 /********************THREAD functions***************/
 
-enemy* spawnEnemy(int startRow, int startCol, pthread_mutex_t *screenLock)
+enemy* spawnEnemy(int startRow, int startCol, player *p, pthread_mutex_t *screenLock)
 {
     enemy* e = (enemy*)(malloc(sizeof(enemy)));
 
@@ -34,7 +35,11 @@ enemy* spawnEnemy(int startRow, int startCol, pthread_mutex_t *screenLock)
 	e->startRow = startRow;
 	e->running = true;
 	e->isHit = false;
+    e->turningRight = false;
+    e->turningLeft = false;
+    e->length = 80;
     e->mutex = screenLock;
+    e->p = p;
 
 	//TODO: Init mutex...
 	wrappedMutexInit(e->mutex, NULL);
@@ -48,23 +53,41 @@ void *runEnemy(void *data) {
 	/* RESET the player state to start */
 	newEnemy(e);
 
-    //animate an "enemy" made of numbers on the screen every second for 10s
-    //this isn't part of my solution, but is for illustration purposes
 	int i = 0;
-    while(1) {
-		char** tile = ENEMY_BODY[i%ENEMY_BODY_ANIM_TILES];
+    while(e->p->running && e->p->lives >= 0) {
+		char** tile = ENEMY_BODY_LEFT[i%ENEMY_BODY_ANIM_TILES];
 
         //probably not threadsafe here...
-        //start centipede at tile 0, 80, move it horizontally once a frame/tick
+        //start centipede at tile 2, 80, move it horizontally once a frame/tick
         //we create the illusion of movement by clearing the screen where the centipede was last
         //then drawing it in the new location. 
 
-        wrappedMutexLock(e->mutex);
-        consoleClearImage(2, 80-i, ENEMY_HEIGHT, ENEMY_WIDTH);
-		consoleDrawImage(2, 80-i-1, tile, ENEMY_HEIGHT);
-        wrappedMutexUnlock(e->mutex);
+        if(e->col == 0) {
+            // If the enemy hit the left wall in the last turn
+            e->row = e->row + 2; // Get it to the second row
+            e->startRow = e->row; //Update startRow
+            i = 0; // clear i's value to 0
+        }
+        
+        if(e->turningRight) {
+
+            // wrappedMutexLock(e->mutex);
+            // consoleClearImage(e->row, e->col, ENEMY_HEIGHT, ENEMY_WIDTH); // Clear
+            // e->col = e->col+i; // col got incremented
+		    // consoleDrawImage(e->row, e->col, tile, ENEMY_HEIGHT);
+            // wrappedMutexUnlock(e->mutex);
+        }
+        else {
+            e->row = e->startRow;
+            wrappedMutexLock(e->mutex);
+            consoleClearImage(e->row, e->startCol-i, ENEMY_HEIGHT, ENEMY_WIDTH);
+            e->col = e->startCol-i-2;
+		    consoleDrawImage(e->row, e->col, tile, ENEMY_HEIGHT);
+            wrappedMutexUnlock(e->mutex);
+        }
 		//consoleRefresh(); //draw everything to screen.
-		sleepTicks(60);
+		sleepTicks(3);
         i++;
-	}	
+	}
+    return NULL;	
 }

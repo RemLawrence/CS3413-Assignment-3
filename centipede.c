@@ -87,7 +87,7 @@ void *runKeyboard(void* data) {
     tv.tv_sec = 1;
     tv.tv_usec = 0;
 
-    while(1) {
+    while(p->running && p->lives >= 0) {
         retval = select(1, &rfds, NULL, NULL, &tv);
         if (retval == -1) {
             perror("select()");
@@ -145,12 +145,13 @@ void *runKeyboard(void* data) {
 }
 
 void *runConsoleRefresh(void *data) {
-        //player* p = (player*)data; unused
-        while(1) {
+        player* p = (player*)data;
+        while(p->lives >= 0) {
                 wrappedMutexLock(&screenLock);
                 consoleRefresh();
                 wrappedMutexUnlock(&screenLock);
         }
+        return NULL;
 }
 
 // THE MAIN, ULTIMATE GAME ENGINE
@@ -173,7 +174,7 @@ void centipedeRun()
                 wrappedPthreadCreate(&(refresh_thread), NULL, runConsoleRefresh, (void*)p);
 
                 //initialize enemy on the screen. startRow=0, startColumn=80
-                enemy *e = spawnEnemy(2, 80, &screenLock);
+                enemy *e = spawnEnemy(2, 80, p, &screenLock);
                 
                 //above, initialize all the threads you need
                 //below, you should make a "gameplay loop" that manages screen drawing
@@ -184,7 +185,7 @@ void centipedeRun()
 
                 //note after this the player thread keeps running and isn't cleaned
                 //up properly. Why don't we see it update on screen?
-                while(1) {
+                while(p->running && p->lives >= 0) {
 
                 }
                 //finalKeypress(); /* wait for final key before killing curses and game */

@@ -2,11 +2,12 @@
 #define ENEMY_H
 
 #define ENEMY_HEIGHT 2
-#define ENEMY_WIDTH 1
+#define ENEMY_WIDTH 80
 #define ENEMY_BODY_ANIM_TILES 4 
 #define ENEMY_SPEED
 #define NUM_THREADS 1
 
+#include "player.h"
 #include "console.h"
 #include "threadwrappers.h"
 #include <pthread.h>
@@ -28,14 +29,21 @@ typedef struct enemy_struct
 
 	bool running;
     bool isHit;
+    bool turningRight;
+    bool turningLeft;
+    int length;
+
+    player *p;
+    
 	int row;
 	int col;
 	int animTile;
+    
 	pthread_t thread;
 	pthread_mutex_t *mutex; //pointer to screenLock
 } enemy;
 
-enemy* spawnEnemy(int startRow, int startCol, pthread_mutex_t *screenLock);
+enemy* spawnEnemy(int startRow, int startCol, player *p, pthread_mutex_t *screenLock);
 void *runEnemy(void *data);
 
 #endif
