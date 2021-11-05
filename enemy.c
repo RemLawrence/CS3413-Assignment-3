@@ -17,17 +17,17 @@ char* ENEMY_BODY_LEFT[ENEMY_BODY_ANIM_TILES][ENEMY_HEIGHT] =
 
 char* ENEMY_BODY_RIGHT[ENEMY_BODY_ANIM_TILES][ENEMY_HEIGHT] = 
 {
-   {"|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||@",
+  {"|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||@",
    ";;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,="},
-  {"||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^@",
-   ";,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;="},
-  {"|^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|@",
+   {"^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^||-",
+   ";;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;="},
+   {"|^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|@",
    ",;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;="},
-  {"^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^||-",
-   ";;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;="}
+   {"||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^@",
+   ";,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;="}
 };
 
-/********************support functions***************/
+/********************support functions***************
 /* reset the player state to start */
 void newEnemy(enemy *e) 
 {
@@ -39,28 +39,7 @@ void newEnemy(enemy *e)
 
 /********************THREAD functions***************/
 
-enemy* spawnEnemy(int startRow, int startCol, player *p, pthread_mutex_t *screenLock)
-{
-    enemy* e = (enemy*)(malloc(sizeof(enemy)));
 
-	e->startCol = startCol; // Initialize the enemy's startCol to the upper left of the console (78)
-	e->startRow = startRow; // Initialize the enemy's startRow to the upper left of the console (2)
-
-	e->running = true;
-	e->isHit = false;
-
-    e->direction = "left";
-
-    e->length = ENEMY_WIDTH; // Length of the enemy body. Could be deducted when hit!
-
-    e->mutex = screenLock; // A reference to the screenlock
-    e->p = p; // A reference to the player
-
-	//TODO: Init mutex...
-	wrappedMutexInit(e->mutex, NULL);
-	wrappedPthreadCreate(&(e->thread), NULL, runEnemy, (void*)e);
-	return e;
-}
 
 void *runEnemy(void *data) {
     // Pass the reference to the player p
@@ -92,14 +71,14 @@ void *runEnemy(void *data) {
 
             wrappedMutexLock(e->mutex);
             consoleClearImage(e->row, -(e->length)+j, ENEMY_HEIGHT, ENEMY_WIDTH); // Clear
-            consoleDrawImage(e->row, -(e->length)+j+2, tile_right, ENEMY_HEIGHT); // Draw
+            consoleDrawImage(e->row, -(e->length)+j+1, tile_right, ENEMY_HEIGHT); // Draw
             wrappedMutexUnlock(e->mutex);
 
             if(e->col+j >= 80) {
                 // The centipede is gonna taking a turn to the next row (new direction: left)
                 e->col = e->col+j; // Update e->col to value 80, here, actually.
                 e->startRow = e->row; //Update startRow. startRow? More like prevRow!
-                if(e->row != 14){
+                if(e->row != 14) {
                     e->row = e->row + 2; // Get it to the next row
                 }
                 else {
@@ -149,7 +128,7 @@ void *runEnemy(void *data) {
                 i++;
             }
         }
-		sleepTicks(3);
+		sleepTicks(6);
 	}
     return NULL;	
 }

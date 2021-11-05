@@ -46,7 +46,7 @@ typedef struct enemy_struct
 	pthread_mutex_t *mutex; //pointer to screenLock
 } enemy;
 
-enemy* spawnEnemy(int startRow, int startCol, player *p, pthread_mutex_t *screenLock);
+void newEnemy(enemy *e);
 void *runEnemy(void *data);
 
 #endif

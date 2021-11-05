@@ -21,6 +21,7 @@
 #include <pthread.h>
 #include "stdio.h"
 #include <sys/select.h>
+#include "llist.h"
 
 
 //all these constants and gameboard should probably go in a constants file...hint hint
@@ -62,8 +63,14 @@ char *GAME_BOARD[] = {
 #define PLAYER_BOUNDARY_ROW 17
 
 pthread_mutex_t screenLock; // Screen Lock
+//initialize keyboard thread
+pthread_t keyboard_thread;
 pthread_mutex_t keyboard_mutex;
+//initialize redraw/refresh thread
+pthread_t refresh_thread;
 pthread_mutex_t refresh_mutex;
+//initialize spawn enemy thread
+pthread_t spawn_thread;
 
 //the rest will hold the main game engine
 //it's likely you'll add quite a bit to it (input, cleanup, synchronization, etc)
@@ -160,21 +167,18 @@ void centipedeRun()
 	if (consoleInit(GAME_ROWS, GAME_COLS, GAME_BOARD))
         {
                 wrappedMutexInit(&screenLock, NULL); // Initialize screenLock
+
                 //initialize player on the screen. startRow=20, startColumn=36, lives=4
                 player *p = spawnPlayer(20, 36, 4, &screenLock);
 
-                //initialize keyboard thread
-                pthread_t keyboard_thread;
                 wrappedMutexInit(&keyboard_mutex, NULL);
                 wrappedPthreadCreate(&(keyboard_thread), NULL, runKeyboard, (void*)p);
 
-                //initialize redraw/refresh thread
-                pthread_t refresh_thread;
                 wrappedMutexInit(&refresh_mutex, NULL);
                 wrappedPthreadCreate(&(refresh_thread), NULL, runConsoleRefresh, (void*)p);
 
                 //initialize enemy on the screen. startRow=0, startColumn=80
-                enemy *e = spawnEnemy(2, 80, p, &screenLock);
+                spawnEnemy(2, 80, p, &screenLock);
                 
                 //above, initialize all the threads you need
                 //below, you should make a "gameplay loop" that manages screen drawing
@@ -193,10 +197,9 @@ void centipedeRun()
                 pthread_join(p->thread, NULL);
                 pthread_join(keyboard_thread, NULL);
                 pthread_join(refresh_thread, NULL);
-                pthread_join(e->thread, NULL);
+                pthread_join(spawn_thread, NULL);
 
                 free(p);
-                free(e);
         }       
         
         consoleFinish();

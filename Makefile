@@ -6,7 +6,7 @@ DEBUG_FLAGS = -g
 
 LDLIBS = -lcurses -pthread
 
-OBJS = main.o console.o centipede.o player.o enemy.o threadwrappers.o
+OBJS = main.o console.o centipede.o player.o enemy.o llist.o threadwrappers.o
 
 EXE = centipede
 
@@ -29,6 +29,8 @@ player.o: player.c player.h centipede.h console.h threadwrappers.h
 enemy.o: enemy.c enemy.h console.h threadwrappers.h
 	$(CC) $(CFLAGS) -c enemy.c
 
+llist.o: llist.c llist.h enemy.h console.h threadwrappers.h
+	$(CC) $(CFLAGS) -c llist.c
 
 console.o: console.c console.h
 	$(CC) $(CFLAGS) -c console.c
