@@ -104,18 +104,10 @@ void *runPlayerT(void *data)
 		}
 
 		// Make the spaceship animation
-		//wrappedMutexLock(&p->mutex);
-		//disableConsole(true);
-		//wrappedMutexUnlock(&p->mutex);
-		
 		wrappedMutexLock(p->mutex);
 		p->animTile++;
 		p->animTile %= PLAYER_ANIM_TILES;
 		wrappedMutexUnlock(p->mutex);
-
-		//wrappedMutexLock(&p->mutex);
-		//disableConsole(false);
-		//wrappedMutexUnlock(&p->mutex);
 
 		playerRedraw(p, true);
 		sleepTicks(PLAYER_ANIM_TICKS);

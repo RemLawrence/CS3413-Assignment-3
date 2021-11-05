@@ -7,6 +7,9 @@
 #define ENEMY_SPEED
 #define NUM_THREADS 1
 
+#define LOWER_ROW_BOUNDARY 14
+#define COL_BOUNDARY 80
+
 #include "player.h"
 #include "console.h"
 #include "threadwrappers.h"
@@ -29,9 +32,9 @@ typedef struct enemy_struct
 
 	bool running;
     bool isHit;
-    bool turningRight;
-    bool turningLeft;
+
     int length;
+    char* direction;
 
     player *p;
     

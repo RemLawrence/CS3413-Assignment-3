@@ -61,7 +61,7 @@ char *GAME_BOARD[] = {
 #define KEY_Q_PREESSED 'q'
 #define PLAYER_BOUNDARY_ROW 17
 
-pthread_mutex_t screenLock; // Screen Lock (p->mutex now)
+pthread_mutex_t screenLock; // Screen Lock
 pthread_mutex_t keyboard_mutex;
 pthread_mutex_t refresh_mutex;
 
@@ -188,7 +188,7 @@ void centipedeRun()
                 while(p->running && p->lives >= 0) {
 
                 }
-                //finalKeypress(); /* wait for final key before killing curses and game */
+                finalKeypress(); /* wait for final key before killing curses and game */
                 p->running = false;
                 pthread_join(p->thread, NULL);
                 pthread_join(keyboard_thread, NULL);
