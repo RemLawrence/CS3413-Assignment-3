@@ -7,8 +7,11 @@
 // A Linked List
 struct node
 {
-    enemy e;
+    enemy *e;
     struct node *next;
 };
 
 void spawnEnemy(int startRow, int startCol, player *p, pthread_mutex_t *screenLock);
+
+struct node* createEnemyQueue(enemy *e);
+void insertEnemyQueue(enemy *e, struct node *enemyQueue);
