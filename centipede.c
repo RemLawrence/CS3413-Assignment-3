@@ -148,7 +148,7 @@ void *runKeyboard(void* data) {
     putBanner("game over...Do, or do not.. there is no try!");
     wrappedMutexUnlock(&screenLock);
 
-    return NULL;
+    pthread_exit(NULL);
 }
 
 void *runConsoleRefresh(void *data) {
@@ -158,12 +158,13 @@ void *runConsoleRefresh(void *data) {
                 consoleRefresh();
                 wrappedMutexUnlock(&screenLock);
         }
-        return NULL;
+        pthread_exit(NULL);
 }
 
 void *runSpawnThread(void *data) {
         player* p = (player*)data;
         spawnEnemy(2, 80, p, &screenLock);
+        pthread_exit(NULL);
 }
 
 // THE MAIN, ULTIMATE GAME ENGINE

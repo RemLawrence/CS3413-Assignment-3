@@ -50,7 +50,6 @@ struct node* createEnemyQueue(enemy *e) {
 void insertEnemyQueue(enemy *e, struct node *enemyQueue) {
     struct node *newEnemyQueue = createEnemyQueue(e);
     while(enemyQueue->next != NULL) {
-        printf("yeah?");
         enemyQueue = enemyQueue -> next;
     }
     enemyQueue->next = newEnemyQueue;

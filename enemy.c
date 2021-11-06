@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <curses.h>
 #include <string.h>
+#include <pthread.h>
 
 char* ENEMY_BODY_LEFT[ENEMY_BODY_ANIM_TILES][ENEMY_HEIGHT] = 
 {
@@ -130,5 +131,5 @@ void *runEnemy(void *data) {
         }
 		sleepTicks(6);
 	}
-    return NULL;	
+    pthread_exit(NULL);	
 }

@@ -13,6 +13,7 @@
 #include "player.h"
 #include <stdio.h>
 #include <curses.h>
+#include <pthread.h>
 
 //sample player graphic, 3 tile animation.
 //feel free to use this or make your own
@@ -113,5 +114,5 @@ void *runPlayerT(void *data)
 		sleepTicks(PLAYER_ANIM_TICKS);
 		
 	}
-	return NULL;
+	pthread_exit(NULL);
 }
