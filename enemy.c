@@ -1,8 +1,11 @@
 #include "enemy.h"
+#include "llist.h"
 #include <stdio.h>
 #include <curses.h>
 #include <string.h>
 #include <pthread.h>
+#include <time.h>
+#include <stdlib.h>
 
 char* ENEMY_BODY_LEFT[ENEMY_BODY_ANIM_TILES][ENEMY_HEIGHT] = 
 {
@@ -29,7 +32,7 @@ char* ENEMY_BODY_RIGHT[ENEMY_BODY_ANIM_TILES][ENEMY_HEIGHT] =
 };
 
 /********************support functions***************
-/* reset the player state to start */
+/* reset the enemy state to start */
 void newEnemy(enemy *e) 
 {
 	e->row = e->startRow;
@@ -39,9 +42,6 @@ void newEnemy(enemy *e)
 }
 
 /********************THREAD functions***************/
-
-
-
 void *runEnemy(void *data) {
     // Pass the reference to the player p
 	enemy* e = (enemy*)data;
@@ -74,6 +74,12 @@ void *runEnemy(void *data) {
             consoleClearImage(e->row, -(e->length)+j, ENEMY_HEIGHT, ENEMY_WIDTH); // Clear
             consoleDrawImage(e->row, -(e->length)+j+1, tile_right, ENEMY_HEIGHT); // Draw
             wrappedMutexUnlock(e->mutex);
+
+            srand(time(NULL));   // Initialization, should only be called once.
+            if(rand()%6 == 0) {
+                // Returns a pseudo-random integer between 0 and RAND_MAX.
+                spawnEnemyBullet(e->row, e->length+j, e->p, e->mutex);
+            }      
 
             if(e->col+j >= 80) {
                 // The centipede is gonna taking a turn to the next row (new direction: left)
@@ -111,6 +117,12 @@ void *runEnemy(void *data) {
             consoleClearImage(e->row, e->col-i, ENEMY_HEIGHT, ENEMY_WIDTH); // e->startCol-i is the current centipede location
 		    consoleDrawImage(e->row, e->col-i-2, tile_left, ENEMY_HEIGHT);
             wrappedMutexUnlock(e->mutex);
+
+            srand(time(NULL));   // Initialization, should only be called once.
+            if(rand()%6 == 0) {
+                // Returns a pseudo-random integer between 0 and RAND_MAX.
+                spawnEnemyBullet(e->row, e->col-i-2, e->p, e->mutex);
+            }  
             
             if(e->col-i-2 <= 0) {
                 // If the enemy hit the left wall in the last turn
@@ -129,7 +141,7 @@ void *runEnemy(void *data) {
                 i++;
             }
         }
-		sleepTicks(6);
+		sleepTicks(40);
 	}
     pthread_exit(NULL);	
 }

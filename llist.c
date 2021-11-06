@@ -36,7 +36,7 @@ void spawnEnemy(int startRow, int startCol, player *p, pthread_mutex_t *screenLo
             insertEnemyQueue(e, enemyQueue);
         }
 
-        sleepTicks(1000);
+        sleepTicks(10000);
     }
 }
 
@@ -53,4 +53,18 @@ void insertEnemyQueue(enemy *e, struct node *enemyQueue) {
         enemyQueue = enemyQueue -> next;
     }
     enemyQueue->next = newEnemyQueue;
+}
+
+
+void spawnEnemyBullet(int startRow, int startCol, player *p, pthread_mutex_t *screenLock)
+{
+    enemyBullet* eb = (enemyBullet*)(malloc(sizeof(enemyBullet)));
+	eb->startCol = startCol;
+	eb->startRow = startRow;
+	eb->mutex = screenLock;
+    eb->p = p;
+
+	//TODO: Init mutex...
+	wrappedMutexInit(eb->mutex, NULL);
+	wrappedPthreadCreate(&(eb->thread), NULL, runEnemyBullet, (void*)eb);
 }

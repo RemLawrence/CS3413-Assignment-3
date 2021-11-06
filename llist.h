@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include "enemy.h"
+#include "bullet.h"
 
 // A Linked List
 struct node
@@ -15,3 +16,4 @@ void spawnEnemy(int startRow, int startCol, player *p, pthread_mutex_t *screenLo
 
 struct node* createEnemyQueue(enemy *e);
 void insertEnemyQueue(enemy *e, struct node *enemyQueue);
+void spawnEnemyBullet(int startRow, int startCol, player *p, pthread_mutex_t *screenLock);
