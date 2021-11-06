@@ -25,6 +25,8 @@ void *runKeyboard(void *data);
 
 void *runConsoleRefresh(void *data);
 
+void *runSpawnThread(void *data);
+
 void centipedeRun();
 
 

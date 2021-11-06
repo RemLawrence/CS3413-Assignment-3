@@ -36,7 +36,7 @@ void spawnEnemy(int startRow, int startCol, player *p, pthread_mutex_t *screenLo
             insertEnemyQueue(e, enemyQueue);
         }
 
-        sleepTicks(2000);
+        sleepTicks(1000);
     }
 }
 

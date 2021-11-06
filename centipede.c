@@ -161,6 +161,11 @@ void *runConsoleRefresh(void *data) {
         return NULL;
 }
 
+void *runSpawnThread(void *data) {
+        player* p = (player*)data;
+        spawnEnemy(2, 80, p, &screenLock);
+}
+
 // THE MAIN, ULTIMATE GAME ENGINE
 void centipedeRun()
 {
@@ -177,8 +182,9 @@ void centipedeRun()
                 wrappedMutexInit(&refresh_mutex, NULL);
                 wrappedPthreadCreate(&(refresh_thread), NULL, runConsoleRefresh, (void*)p);
 
-                //initialize enemy on the screen. startRow=0, startColumn=80
-                spawnEnemy(2, 80, p, &screenLock);
+                //initialize the spawn thread on the screen. startRow=0, startColumn=80
+                wrappedPthreadCreate(&(spawn_thread), NULL, runSpawnThread, (void*)p);
+                
                 
                 //above, initialize all the threads you need
                 //below, you should make a "gameplay loop" that manages screen drawing
