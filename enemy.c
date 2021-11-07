@@ -76,9 +76,9 @@ void *runEnemy(void *data) {
             wrappedMutexUnlock(e->mutex);
 
             srand(time(NULL));   // Initialization, should only be called once.
-            if(rand()%6 == 0) {
+            if(rand()%8 == 0) {
                 // Returns a pseudo-random integer between 0 and RAND_MAX.
-                spawnEnemyBullet(e->row, e->length+j, e->p, e->mutex);
+                spawnEnemyBullet(e->row+1, j, e->p, e->mutex);
             }      
 
             if(e->col+j >= 80) {
@@ -119,9 +119,9 @@ void *runEnemy(void *data) {
             wrappedMutexUnlock(e->mutex);
 
             srand(time(NULL));   // Initialization, should only be called once.
-            if(rand()%6 == 0) {
+            if(rand()%8 == 0) {
                 // Returns a pseudo-random integer between 0 and RAND_MAX.
-                spawnEnemyBullet(e->row, e->col-i-2, e->p, e->mutex);
+                spawnEnemyBullet(e->row+2, e->col-i-2, e->p, e->mutex);
             }  
             
             if(e->col-i-2 <= 0) {
