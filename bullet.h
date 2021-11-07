@@ -1,3 +1,6 @@
+#ifndef BULLET_H
+#define BULLET_H
+
 #include "enemy.h"
 #include "player.h"
 #include <stdio.h>
@@ -7,6 +10,8 @@
 
 #define BULLET_SIZE 1
 #define BULLET_ANIM_TILES 1
+
+#define UPPER_BOUNDARY 2
 
 typedef struct playerBullet_struct 
 {
@@ -47,4 +52,8 @@ typedef struct enemyBullet_struct
 } enemyBullet;
 
 void newEnemyBullet(enemyBullet *eb);
+void newPlayerBullet(playerBullet *pb);
 void *runEnemyBullet(void *data);
+void *runPlayerBullet(void *data);
+
+#endif

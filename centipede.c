@@ -14,14 +14,11 @@
 
 **********************************************************************/
 #include "centipede.h"
-#include "player.h"
-#include "enemy.h"
 #include <string.h>
 #include <unistd.h>
 #include <pthread.h>
-#include "stdio.h"
+#include <stdio.h>
 #include <sys/select.h>
-#include "llist.h"
 
 
 //all these constants and gameboard should probably go in a constants file...hint hint
@@ -54,13 +51,6 @@ char *GAME_BOARD[] = {
 "",
 "", 
 "" };
-
-#define KEY_W_PREESSED 'w'
-#define KEY_A_PREESSED 'a'
-#define KEY_S_PREESSED 's'
-#define KEY_D_PREESSED 'd'
-#define KEY_Q_PREESSED 'q'
-#define PLAYER_BOUNDARY_ROW 17
 
 pthread_mutex_t screenLock; // Screen Lock
 //initialize keyboard thread
@@ -104,6 +94,7 @@ void *runKeyboard(void* data) {
             /* FD_ISSET(0, &rfds) is true so input is available now. */
             char input;
             input = getchar();
+            putchar(input);
 
             int prevRow = p->row;
             int prevCol = p->col;
@@ -133,6 +124,10 @@ void *runKeyboard(void* data) {
                                 p->col = p->col + 1;
                         }
                         break;
+                case SPACE_PREESSED:
+                        // Shoot bullet
+                        spawnPlayerBullet(p->row-1, p->col+2, p, &screenLock);
+                        break;        
                 case KEY_Q_PREESSED:
                         wrappedMutexLock(&screenLock);
                         putBanner("quitter....");

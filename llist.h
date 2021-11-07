@@ -17,3 +17,4 @@ void spawnEnemy(int startRow, int startCol, player *p, pthread_mutex_t *screenLo
 struct node* createEnemyQueue(enemy *e);
 void insertEnemyQueue(enemy *e, struct node *enemyQueue);
 void spawnEnemyBullet(int startRow, int startCol, player *p, pthread_mutex_t *screenLock);
+void spawnPlayerBullet(int startRow, int startCol, player *p, pthread_mutex_t *screenLock);

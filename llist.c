@@ -68,3 +68,16 @@ void spawnEnemyBullet(int startRow, int startCol, player *p, pthread_mutex_t *sc
 	wrappedMutexInit(eb->mutex, NULL);
 	wrappedPthreadCreate(&(eb->thread), NULL, runEnemyBullet, (void*)eb);
 }
+
+void spawnPlayerBullet(int startRow, int startCol, player *p, pthread_mutex_t *screenLock)
+{
+    playerBullet* pb = (playerBullet*)(malloc(sizeof(playerBullet)));
+	pb->startCol = startCol;
+	pb->startRow = startRow;
+	pb->mutex = screenLock;
+    pb->p = p;
+
+	//TODO: Init mutex...
+	wrappedMutexInit(pb->mutex, NULL);
+	wrappedPthreadCreate(&(pb->thread), NULL, runPlayerBullet, (void*)pb);
+}
