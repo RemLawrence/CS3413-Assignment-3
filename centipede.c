@@ -86,6 +86,8 @@ void *runKeyboard(void* data) {
     tv.tv_sec = 1;
     tv.tv_usec = 0;
 
+    bool shootThreadCreated = false;
+
     while(p->running && p->lives >= 0) {
         retval = select(1, &rfds, NULL, NULL, &tv);
         if (retval == -1) {
@@ -126,8 +128,11 @@ void *runKeyboard(void* data) {
                         }
                         break;
                 case SPACE_PREESSED:
-                        // Shoot bullet
-                        wrappedPthreadCreate(&(player_shoot_thread), NULL, playerShootBullet, (void*)p);
+                        if(!shootThreadCreated) {
+                                // Shoot bullet
+                                wrappedPthreadCreate(&(player_shoot_thread), NULL, playerShootBullet, (void*)p);
+                                shootThreadCreated = true;
+                        }
                         break;
                 case KEY_Q_PREESSED:
                         wrappedMutexLock(&screenLock);
@@ -150,14 +155,16 @@ void *runKeyboard(void* data) {
 void *playerShootBullet(void* data) {
         // Pass the reference to the player p
         player* p = (player*)data;
-        spawnPlayerBullet(p->row-1, p->col+2, p, &screenLock);
-        sleep(10000);
+        while(p->running && p->lives >= 0) {
+                spawnPlayerBullet(p->row-1, p->col+2, p, &screenLock);
+                sleep(1000);
+        }
         pthread_exit(NULL);
 }
 
 void *runConsoleRefresh(void *data) {
         player* p = (player*)data;
-        while(p->lives >= 0) {
+        while(p->running && p->lives >= 0) {
                 wrappedMutexLock(&screenLock);
                 consoleRefresh();
                 wrappedMutexUnlock(&screenLock);
