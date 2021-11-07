@@ -38,8 +38,6 @@ void *runConsoleRefresh(void *data);
 
 void *runSpawnThread(void *data);
 
-void *playerShootBullet(void* data);
-
 void centipedeRun();
 
 

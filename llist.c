@@ -7,7 +7,7 @@
 void spawnEnemy(int startRow, int startCol, player *p, pthread_mutex_t *screenLock)
 {
     bool first = true;
-    struct node* enemyQueue;
+    enemyNode* enemyQueue;
     while(p->running && p->lives >= 0) {
         enemy* e = (enemy*)(malloc(sizeof(enemy)));
 
@@ -40,15 +40,15 @@ void spawnEnemy(int startRow, int startCol, player *p, pthread_mutex_t *screenLo
     }
 }
 
-struct node* createEnemyQueue(enemy *e) {
-    struct node *newEnemyQueue = (struct node*)malloc(sizeof(struct node));
+enemyNode* createEnemyQueue(enemy *e) {
+    enemyNode *newEnemyQueue = (enemyNode*)malloc(sizeof(enemyNode));
     newEnemyQueue->e = e;
     newEnemyQueue->next = NULL;
     return newEnemyQueue; // node created and return it
 }
 
-void insertEnemyQueue(enemy *e, struct node *enemyQueue) {
-    struct node *newEnemyQueue = createEnemyQueue(e);
+void insertEnemyQueue(enemy *e, enemyNode *enemyQueue) {
+    enemyNode *newEnemyQueue = createEnemyQueue(e);
     while(enemyQueue->next != NULL) {
         enemyQueue = enemyQueue -> next;
     }

@@ -52,6 +52,11 @@ void *runEnemyBullet(void *data) {
         }
         consoleDrawImage(eb->row, eb->col, enemy_bullet_tile, BULLET_SIZE); // Draw
         wrappedMutexUnlock(eb->mutex);
+
+        if(eb->row >= eb->p->row && eb->col >= eb->p->col){
+            printf("oh");
+        }
+
         sleepTicks(6); // Speed of the bullet
     }
 
