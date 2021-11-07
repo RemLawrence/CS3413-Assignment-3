@@ -54,7 +54,7 @@ void *runEnemyBullet(void *data) {
         wrappedMutexUnlock(eb->mutex);
 
         if(eb->row == eb->p->row && (eb->col == eb->p->col || eb->col == eb->p->col+1 || eb->col == eb->p->col+2 || eb->col == eb->p->col+3 || eb->col == eb->p->col+4)){
-            printf("oh");
+            killPlayer(eb->p);
         }
 
         sleepTicks(6); // Speed of the bullet

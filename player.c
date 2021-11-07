@@ -116,3 +116,7 @@ void *runPlayerT(void *data)
 	}
 	pthread_exit(NULL);
 }
+
+void killPlayer(player* p) {
+	p->lives--;
+}
