@@ -18,12 +18,11 @@
 
 #define PLAYER_ANIM_TILES 3
 #define PLAYER_ANIM_TICKS 30
-#define PLAYER_WIDTH 3 
+#define PLAYER_WIDTH 5 
 #define PLAYER_HEIGHT 4 
 
 #include "console.h"
 #include "threadwrappers.h"
-#include "centipede.h"
 #include <pthread.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -50,12 +49,12 @@ typedef struct player_struct
 	int col;
 	int animTile;
 	pthread_t thread;
-	pthread_mutex_t mutex;
+	pthread_mutex_t *mutex; //pointer to screenLock
 } player;
 
 void *runPlayerT(void *data);
 
-player* spawnPlayer(int startRow, int startCol, int lives);
+player* spawnPlayer(int startRow, int startCol, int lives, pthread_mutex_t *screenLock);
 
 /* thread safe for player & ALSO LOCKS SCREEN */
 //yours may or may not lock the screen on call.
