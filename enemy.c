@@ -79,17 +79,17 @@ void *runEnemy(void *data) {
             if(rand()%8 == 0) {
                 // Returns a pseudo-random integer between 0 and RAND_MAX.
                 spawnEnemyBullet(e->row+1, j, e->p, e->mutex);
-            }      
+            }
 
             if(e->col+j >= 80) {
                 // The centipede is gonna taking a turn to the next row (new direction: left)
                 e->col = e->col+j; // Update e->col to value 80, here, actually.
                 e->startRow = e->row; //Update startRow. startRow? More like prevRow!
-                if(e->row != 14) {
+                if(e->row != LAST_ROW) {
                     e->row = e->row + 2; // Get it to the next row
                 }
                 else {
-                    e->row = 14; // Get it to the next row
+                    e->row = LAST_ROW; // Get it to the next row
                 }
                 
                 j = 0; // Clear the right incrementor to 0, for the next use

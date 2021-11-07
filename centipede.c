@@ -61,6 +61,8 @@ pthread_t refresh_thread;
 pthread_mutex_t refresh_mutex;
 //initialize spawn enemy thread
 pthread_t spawn_thread;
+//initialize player shoot thread
+pthread_t player_shoot_thread;
 
 //the rest will hold the main game engine
 //it's likely you'll add quite a bit to it (input, cleanup, synchronization, etc)
@@ -94,7 +96,6 @@ void *runKeyboard(void* data) {
             /* FD_ISSET(0, &rfds) is true so input is available now. */
             char input;
             input = getchar();
-            putchar(input);
 
             int prevRow = p->row;
             int prevCol = p->col;
@@ -126,8 +127,8 @@ void *runKeyboard(void* data) {
                         break;
                 case SPACE_PREESSED:
                         // Shoot bullet
-                        spawnPlayerBullet(p->row-1, p->col+2, p, &screenLock);
-                        break;        
+                        wrappedPthreadCreate(&(player_shoot_thread), NULL, playerShootBullet, (void*)p);
+                        break;
                 case KEY_Q_PREESSED:
                         wrappedMutexLock(&screenLock);
                         putBanner("quitter....");
@@ -144,6 +145,14 @@ void *runKeyboard(void* data) {
     wrappedMutexUnlock(&screenLock);
 
     pthread_exit(NULL);
+}
+
+void *playerShootBullet(void* data) {
+        // Pass the reference to the player p
+        player* p = (player*)data;
+        spawnPlayerBullet(p->row-1, p->col+2, p, &screenLock);
+        sleep(10000);
+        pthread_exit(NULL);
 }
 
 void *runConsoleRefresh(void *data) {

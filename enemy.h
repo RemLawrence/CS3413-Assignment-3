@@ -9,6 +9,7 @@
 
 #define LOWER_ROW_BOUNDARY 14
 #define COL_BOUNDARY 80
+#define LAST_ROW 14
 
 #include "player.h"
 #include "console.h"
