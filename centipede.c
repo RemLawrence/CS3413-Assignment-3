@@ -27,7 +27,7 @@
 
 /**** DIMENSIONS MUST MATCH the ROWS/COLS */
 char *GAME_BOARD[] = {
-"                   Score:          Lives:",
+"                   Score:    0     Lives:    4",
 "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-centipiede!=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=",
 "",
 "",
@@ -53,6 +53,7 @@ char *GAME_BOARD[] = {
 "" };
 
 pthread_mutex_t screenLock; // Screen Lock
+
 //initialize keyboard thread
 pthread_t keyboard_thread;
 pthread_mutex_t keyboard_mutex;
@@ -61,8 +62,9 @@ pthread_t refresh_thread;
 pthread_mutex_t refresh_mutex;
 //initialize spawn enemy thread
 pthread_t spawn_thread;
-//initialize player shoot thread
-pthread_t player_shoot_thread;
+//initialize upkeep thread
+pthread_t upkeep_thread;
+pthread_mutex_t upkeep_mutex;
 
 //the rest will hold the main game engine
 //it's likely you'll add quite a bit to it (input, cleanup, synchronization, etc)
@@ -149,7 +151,7 @@ void *runKeyboard(void* data) {
 
 void *runConsoleRefresh(void *data) {
         player* p = (player*)data;
-        while(p->lives >= 0) {
+        while(p->running && p->lives >= 0) {
                 wrappedMutexLock(&screenLock);
                 consoleRefresh();
                 wrappedMutexUnlock(&screenLock);
@@ -178,6 +180,9 @@ void centipedeRun()
 
                 wrappedMutexInit(&refresh_mutex, NULL);
                 wrappedPthreadCreate(&(refresh_thread), NULL, runConsoleRefresh, (void*)p);
+
+                wrappedMutexInit(&upkeep_mutex, NULL);
+                wrappedPthreadCreate(&(upkeep_thread), NULL, runUpkeep, (void*)p);
 
                 //initialize the spawn thread on the screen. startRow=0, startColumn=80
                 wrappedPthreadCreate(&(spawn_thread), NULL, runSpawnThread, (void*)p);

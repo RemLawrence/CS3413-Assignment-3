@@ -45,6 +45,7 @@ typedef struct player_struct
 
 	bool running;
 	int lives;
+	int score;
 	int row;
 	int col;
 	int animTile;

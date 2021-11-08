@@ -23,6 +23,7 @@
 #include "enemy.h"
 #include "llist.h"
 #include "bullet.h"
+#include "gameglobals.h"
 
 #define KEY_W_PREESSED 'w'
 #define KEY_A_PREESSED 'a'

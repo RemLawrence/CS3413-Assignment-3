@@ -53,8 +53,10 @@ void *runEnemyBullet(void *data) {
         consoleDrawImage(eb->row, eb->col, enemy_bullet_tile, BULLET_SIZE); // Draw
         wrappedMutexUnlock(eb->mutex);
 
-        if(eb->row == eb->p->row && (eb->col == eb->p->col || eb->col == eb->p->col+1 || eb->col == eb->p->col+2 || eb->col == eb->p->col+3 || eb->col == eb->p->col+4)){
+        if(eb->row == eb->p->row && (eb->col == eb->p->col || eb->col == eb->p->col+1 || eb->col == eb->p->col+2 || eb->col == eb->p->col+3 || eb->col == eb->p->col+4)) {
+            // The player got hit by the bullet
             killPlayer(eb->p);
+            break;
         }
 
         sleepTicks(6); // Speed of the bullet
@@ -66,6 +68,7 @@ void *runEnemyBullet(void *data) {
 void *runPlayerBullet(void *data) {
     playerBullet* pb = (playerBullet*)data;
     newPlayerBullet(pb);
+    pb->p->score = pb->p->score + 1;
     while(pb->p->running && pb->p->lives >= 0) {
         // and not being consumed...
         char** player_bullet_tile = PLAYER_BULLET[BULLET_ANIM_TILES-1];

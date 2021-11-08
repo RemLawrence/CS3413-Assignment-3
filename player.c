@@ -72,6 +72,7 @@ player* spawnPlayer(int startRow, int startCol, int lives, pthread_mutex_t *scre
 {
     player* p = (player*)(malloc(sizeof(player)));
 	p->lives = lives;
+	p->score = 0;
 	p->startCol = startCol;
 	p->startRow = startRow;
 	p->running = true;
@@ -119,4 +120,5 @@ void *runPlayerT(void *data)
 
 void killPlayer(player* p) {
 	p->lives--;
+	// TODO: and freeze screen
 }
