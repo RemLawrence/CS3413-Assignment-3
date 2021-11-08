@@ -8,7 +8,7 @@ void spawnEnemy(int startRow, int startCol, player *p, pthread_mutex_t *screenLo
 {
     bool first = true;
     enemyNode* enemyQueue;
-    while(p->running && p->lives >= 0) {
+    while(p->running && p->lives > 0) {
         enemy* e = (enemy*)(malloc(sizeof(enemy)));
 
         e->startCol = startCol; // Initialize the enemy's startCol to the upper left of the console (78)

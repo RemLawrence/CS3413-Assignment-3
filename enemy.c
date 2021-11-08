@@ -51,7 +51,7 @@ void *runEnemy(void *data) {
 	int i = 0; // aka. leftIncrementor
     int j = 0; // aka. rightIncrementor
 
-    while(e->p->running && e->p->lives >= 0) {
+    while(e->p->running && e->p->lives > 0) {
 		char** tile_left = ENEMY_BODY_LEFT[i%ENEMY_BODY_ANIM_TILES];
         char** tile_right = ENEMY_BODY_RIGHT[j%ENEMY_BODY_ANIM_TILES];
 

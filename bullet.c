@@ -36,7 +36,7 @@ void newPlayerBullet(playerBullet *pb)
 void *runEnemyBullet(void *data) {
     enemyBullet* eb = (enemyBullet*)data;
     newEnemyBullet(eb);
-    while(eb->p->running && eb->p->lives >= 0) {
+    while(eb->p->running && eb->p->lives > 0) {
         // and not being consumed...
         char** enemy_bullet_tile = ENEMY_BULLET[BULLET_ANIM_TILES-1];
 
@@ -69,7 +69,7 @@ void *runPlayerBullet(void *data) {
     playerBullet* pb = (playerBullet*)data;
     newPlayerBullet(pb);
     pb->p->score = pb->p->score + 1;
-    while(pb->p->running && pb->p->lives >= 0) {
+    while(pb->p->running && pb->p->lives > 0) {
         // and not being consumed...
         char** player_bullet_tile = PLAYER_BULLET[BULLET_ANIM_TILES-1];
 

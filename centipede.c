@@ -88,7 +88,7 @@ void *runKeyboard(void* data) {
     tv.tv_sec = 1;
     tv.tv_usec = 0;
 
-    while(p->running && p->lives >= 0) {
+    while(p->running && p->lives > 0) {
         retval = select(1, &rfds, NULL, NULL, &tv);
         if (retval == -1) {
             perror("select()");
@@ -151,7 +151,7 @@ void *runKeyboard(void* data) {
 
 void *runConsoleRefresh(void *data) {
         player* p = (player*)data;
-        while(p->running && p->lives >= 0) {
+        while(p->running && p->lives > 0) {
                 wrappedMutexLock(&screenLock);
                 consoleRefresh();
                 wrappedMutexUnlock(&screenLock);
@@ -197,7 +197,7 @@ void centipedeRun()
 
                 //note after this the player thread keeps running and isn't cleaned
                 //up properly. Why don't we see it update on screen?
-                while(p->running && p->lives >= 0) {
+                while(p->running && p->lives > 0) {
 
                 }
                 finalKeypress(); /* wait for final key before killing curses and game */

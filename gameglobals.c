@@ -6,7 +6,7 @@ void *runUpkeep(void *data) {
     char score[10];
     char lives[10];
 
-    while (p->running && p-> lives >= 0) {
+    while (p->running && p-> lives > 0) {
         sprintf(score, "%d", p->score);
         sprintf(lives, "%d", p->lives);
         wrappedMutexLock(p->mutex);

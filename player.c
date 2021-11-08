@@ -91,7 +91,7 @@ void *runPlayerT(void *data)
 	/* RESET the player state to start */
 	newPlayer(p);
 	
-	while (p->running && p->lives >= 0) 
+	while (p->running && p->lives > 0) 
 	{
 		//TODO: not threadsafe!!!!
 		switch(p->state)
