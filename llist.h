@@ -21,12 +21,11 @@ typedef struct nod
 } BulletNode;
 
 void spawnEnemy(int startRow, int startCol, player *p, pthread_mutex_t *screenLock);
-
 struct node* createEnemyQueue(enemy *e);
 void insertEnemyQueue(enemy *e, enemyNode *enemyQueue);
+enemyNode* getEnemyQueue();
+
 void spawnEnemyBullet(int startRow, int startCol, player *p, pthread_mutex_t *screenLock);
 void spawnPlayerBullet(int startRow, int startCol, player *p, pthread_mutex_t *screenLock);
-
-
 BulletNode* createBulletQueue(playerBullet *pb, enemyBullet *eb);
 void insertBulletQueue(playerBullet *pb, enemyBullet *eb, BulletNode *BulletQueue);

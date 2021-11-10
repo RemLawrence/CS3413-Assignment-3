@@ -4,13 +4,15 @@
 #include <stdbool.h>
 #include <string.h>
 
+enemyNode* enemyQueue;
+
 bool bulletQInitialized = false;
 BulletNode *bulletQueue;
 
 void spawnEnemy(int startRow, int startCol, player *p, pthread_mutex_t *screenLock)
 {
     bool first = true;
-    enemyNode* enemyQueue;
+    
     while(p->running && p->lives > 0) {
         enemy* e = (enemy*)(malloc(sizeof(enemy)));
 
@@ -56,6 +58,10 @@ void insertEnemyQueue(enemy *e, enemyNode *enemyQueue) {
         enemyQueue = enemyQueue -> next;
     }
     enemyQueue->next = newEnemyQueue;
+}
+
+enemyNode* getEnemyQueue() {
+    return enemyQueue;
 }
 
 

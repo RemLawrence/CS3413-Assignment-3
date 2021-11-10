@@ -1,4 +1,5 @@
 #include "bullet.h"
+#include "llist.h"
 #include <stdio.h>
 #include <curses.h>
 #include <string.h>
@@ -86,6 +87,10 @@ void *runPlayerBullet(void *data) {
         }
         else {
             pb->row = pb->row-1;
+        }
+        enemyNode *enemyList = getEnemyQueue();
+        while(enemyList -> next != NULL) {
+            printf("asidufyasd");
         }
 
         consoleDrawImage(pb->row, pb->col, player_bullet_tile, BULLET_SIZE); // Draw
