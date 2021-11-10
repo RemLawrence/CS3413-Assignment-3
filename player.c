@@ -2,11 +2,9 @@
   Module: player.c
   Author: Daniel Rea
 
-  Purpose: code to run the player in its own thread.
-	For distribution to students. Not all functions implemented.
-	This is just from my solution with parts removed. 
-    Treat it as a guide. Feel free to implement,
-	change, remove, etc, in your own solution.
+  Contains all the functions related to the player, including initializing
+  a new player, initialize the player thread function, player animation, 
+  
 
 **********************************************************************/
 

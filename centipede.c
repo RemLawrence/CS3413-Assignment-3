@@ -4,13 +4,14 @@
 
   Purpose: the core source file for the game engine. This manages the
   thread initialization of all parts, provides functions for global lock
-  coordination for the screen, and helps synchronize threads when necessary.
+  coordination for the screen, initializes all the threads needed for the 
+  main game loop, and helps synchronize threads when necessary.
 
-  Use this to get an idea of how to add things as part of the game.
-  Feel free to use any of this freely in your solution, or change or modify
-  this code.
+  The main game loop sleeps and waits for when the game ends (either player wins,
+  loses, or the game quits)
 
-  Some functions unimplemented, just to show how I roughly went about things.
+  Includes thread functions for: keyboard thread, refresh thread, and enemy spawn
+  thread.
 
 **********************************************************************/
 #include "centipede.h"
@@ -175,6 +176,9 @@ void centipedeRun()
                 //initialize player on the screen. startRow=20, startColumn=36, lives=4
                 player *p = spawnPlayer(20, 36, 4, &screenLock);
 
+                //initialize the spawn thread on the screen. startRow=0, startColumn=80
+                wrappedPthreadCreate(&(spawn_thread), NULL, runSpawnThread, (void*)p);
+
                 wrappedMutexInit(&keyboard_mutex, NULL);
                 wrappedPthreadCreate(&(keyboard_thread), NULL, runKeyboard, (void*)p);
 
@@ -182,11 +186,7 @@ void centipedeRun()
                 wrappedPthreadCreate(&(refresh_thread), NULL, runConsoleRefresh, (void*)p);
 
                 wrappedMutexInit(&upkeep_mutex, NULL);
-                wrappedPthreadCreate(&(upkeep_thread), NULL, runUpkeep, (void*)p);
-
-                //initialize the spawn thread on the screen. startRow=0, startColumn=80
-                wrappedPthreadCreate(&(spawn_thread), NULL, runSpawnThread, (void*)p);
-                
+                wrappedPthreadCreate(&(upkeep_thread), NULL, runUpkeep, (void*)p);              
                 
                 //above, initialize all the threads you need
                 //below, you should make a "gameplay loop" that manages screen drawing

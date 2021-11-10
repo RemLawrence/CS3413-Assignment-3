@@ -61,7 +61,7 @@ void *runEnemyBullet(void *data) {
 
         sleepTicks(6); // Speed of the bullet
     }
-
+    //TODO: delete this bullet from linked list
     pthread_exit(NULL);
 }
 
@@ -89,7 +89,7 @@ void *runPlayerBullet(void *data) {
         wrappedMutexUnlock(pb->mutex);
         sleepTicks(6); // Speed of the bullet
     }
-
+    //TODO: delete this bullet from linked list
     pthread_exit(NULL);
 }
 

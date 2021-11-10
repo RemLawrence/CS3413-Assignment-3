@@ -4,6 +4,9 @@
 #include <stdbool.h>
 #include <string.h>
 
+bool bulletQInitialized = false;
+BulletNode *bulletQueue;
+
 void spawnEnemy(int startRow, int startCol, player *p, pthread_mutex_t *screenLock)
 {
     bool first = true;
@@ -64,6 +67,14 @@ void spawnEnemyBullet(int startRow, int startCol, player *p, pthread_mutex_t *sc
 	eb->mutex = screenLock;
     eb->p = p;
 
+    if (!bulletQInitialized) {
+        bulletQueue = createBulletQueue(NULL, eb);
+        bulletQInitialized = true;
+    }
+    else {
+        insertBulletQueue(NULL, eb, bulletQueue);
+    }
+
 	//TODO: Init mutex...
 	wrappedMutexInit(eb->mutex, NULL);
 	wrappedPthreadCreate(&(eb->thread), NULL, runEnemyBullet, (void*)eb);
@@ -77,7 +88,34 @@ void spawnPlayerBullet(int startRow, int startCol, player *p, pthread_mutex_t *s
 	pb->mutex = screenLock;
     pb->p = p;
 
+    if (!bulletQInitialized) {
+        bulletQueue = createBulletQueue(pb, NULL);
+        bulletQInitialized = true;
+    }
+    else {
+        insertBulletQueue(pb, NULL, bulletQueue);
+    }
+
 	//TODO: Init mutex...
 	wrappedMutexInit(pb->mutex, NULL);
 	wrappedPthreadCreate(&(pb->thread), NULL, runPlayerBullet, (void*)pb);
 }
+
+BulletNode* createBulletQueue(playerBullet *pb, enemyBullet *eb) {
+    BulletNode *newBulletQueue = (BulletNode*)malloc(sizeof(BulletNode));
+    newBulletQueue->pb = pb;
+    newBulletQueue->eb = eb;
+    newBulletQueue->next = NULL;
+    return newBulletQueue; // node created and return it
+}
+
+void insertBulletQueue(playerBullet *pb, enemyBullet *eb, BulletNode *BulletQueue) {
+    BulletNode *newBulletQueue = createBulletQueue(pb, eb);
+    while(BulletQueue->next != NULL) {
+        printf("ok");
+        BulletQueue = BulletQueue -> next;
+    }
+    BulletQueue->next = newBulletQueue;
+}
+
+//void deleteBullet()

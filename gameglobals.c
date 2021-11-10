@@ -3,12 +3,12 @@
 
 void *runUpkeep(void *data) {
     player* p = (player*)data;
-    char score[10];
-    char lives[10];
+    char score[BUF_SIZE];
+    char lives[BUF_SIZE];
 
     while (p->running && p-> lives > 0) {
-        sprintf(score, "%d", p->score);
-        sprintf(lives, "%d", p->lives);
+        sprintf(score, "%d", p->score); // Convert int score to a string
+        sprintf(lives, "%d", p->lives); // Convert int score to a string
         wrappedMutexLock(p->mutex);
         putString(score, 0, 29, 4);
         wrappedMutexUnlock(p->mutex);

@@ -12,9 +12,21 @@ typedef struct node
     struct node *next;
 } enemyNode;
 
+// A Linked List
+typedef struct nod
+{
+    enemyBullet *eb;
+    playerBullet *pb;
+    struct nod *next;
+} BulletNode;
+
 void spawnEnemy(int startRow, int startCol, player *p, pthread_mutex_t *screenLock);
 
 struct node* createEnemyQueue(enemy *e);
 void insertEnemyQueue(enemy *e, enemyNode *enemyQueue);
 void spawnEnemyBullet(int startRow, int startCol, player *p, pthread_mutex_t *screenLock);
 void spawnPlayerBullet(int startRow, int startCol, player *p, pthread_mutex_t *screenLock);
+
+
+BulletNode* createBulletQueue(playerBullet *pb, enemyBullet *eb);
+void insertBulletQueue(playerBullet *pb, enemyBullet *eb, BulletNode *BulletQueue);
