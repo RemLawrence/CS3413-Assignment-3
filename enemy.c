@@ -81,6 +81,22 @@ void *runEnemy(void *data) {
                 spawnEnemyBullet(e->row+1, j, e->p, e->mutex);
             }
 
+            BulletNode *bulletList = getBulletQueue();
+            
+            if(bulletList != NULL) {
+                while(bulletList->next != NULL) {
+                    if(bulletList->pb != NULL) {
+                        if(bulletList->pb->row == e->row && (bulletList->pb->col >= -(e->length)+j+1 && bulletList->pb->col <= j)) {
+                            // TODO: Split the enemy
+                            wrappedMutexLock(e->mutex);
+                            consoleClearImage(bulletList->pb->row, bulletList->pb->col, BULLET_SIZE, BULLET_SIZE); // Clear bullet when it hits the player
+                            wrappedMutexUnlock(e->mutex);
+                        }
+                        bulletList = bulletList->next; //iterate throught the linked list
+                    }
+                }
+            }
+
             if(e->col+j >= 80) {
                 // The centipede is gonna taking a turn to the next row (new direction: left)
                 e->col = e->col+j; // Update e->col to value 80, here, actually.
@@ -117,6 +133,23 @@ void *runEnemy(void *data) {
             consoleClearImage(e->row, e->col-i, ENEMY_HEIGHT, ENEMY_WIDTH); // e->startCol-i is the current centipede location
 		    consoleDrawImage(e->row, e->col-i-2, tile_left, ENEMY_HEIGHT);
             wrappedMutexUnlock(e->mutex);
+
+            BulletNode *bulletList = getBulletQueue();
+            
+            if(bulletList != NULL) {
+                while(bulletList->next != NULL) {
+                    if(bulletList->pb != NULL) {
+                        if(bulletList->pb->row == e->row && (bulletList->pb->col >= e->col-i && bulletList->pb->col <= e->col-i+ENEMY_WIDTH)) {
+                            // TODO: Split the enemy
+                            wrappedMutexLock(bulletList->pb->mutex);
+                            consoleClearImage(bulletList->pb->row, bulletList->pb->col, BULLET_SIZE, BULLET_SIZE); // Clear bullet when it hits the player
+                            wrappedMutexUnlock(bulletList->pb->mutex);
+                            printf("afd");
+                        }
+                        bulletList = bulletList->next; //iterate throught the linked list
+                    }
+                }
+            }
 
             srand(time(NULL));   // Initialization, should only be called once.
             if(rand()%8 == 0) {

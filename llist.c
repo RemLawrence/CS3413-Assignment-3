@@ -124,3 +124,7 @@ void insertBulletQueue(playerBullet *pb, enemyBullet *eb, BulletNode *BulletQueu
 }
 
 //void deleteBullet()
+
+BulletNode* getBulletQueue() {
+    return bulletQueue;
+}

@@ -88,10 +88,6 @@ void *runPlayerBullet(void *data) {
         else {
             pb->row = pb->row-1;
         }
-        enemyNode *enemyList = getEnemyQueue();
-        while(enemyList -> next != NULL) {
-            printf("asidufyasd");
-        }
 
         consoleDrawImage(pb->row, pb->col, player_bullet_tile, BULLET_SIZE); // Draw
         wrappedMutexUnlock(pb->mutex);

@@ -29,3 +29,4 @@ void spawnEnemyBullet(int startRow, int startCol, player *p, pthread_mutex_t *sc
 void spawnPlayerBullet(int startRow, int startCol, player *p, pthread_mutex_t *screenLock);
 BulletNode* createBulletQueue(playerBullet *pb, enemyBullet *eb);
 void insertBulletQueue(playerBullet *pb, enemyBullet *eb, BulletNode *BulletQueue);
+BulletNode* getBulletQueue();
