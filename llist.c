@@ -112,7 +112,6 @@ BulletNode* createBulletQueue(playerBullet *pb, enemyBullet *eb) {
 void insertBulletQueue(playerBullet *pb, enemyBullet *eb, BulletNode *BulletQueue) {
     BulletNode *newBulletQueue = createBulletQueue(pb, eb);
     while(BulletQueue->next != NULL) {
-        printf("ok");
         BulletQueue = BulletQueue -> next;
     }
     BulletQueue->next = newBulletQueue;
