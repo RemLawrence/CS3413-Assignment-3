@@ -98,7 +98,7 @@ void *runKeyboard(void* data) {
         else {
             /* FD_ISSET(0, &rfds) is true so input is available now. */
             char input;
-            input = getchar();
+            input = getchar(); // TODO: NO, THIS IS NOT PERFECT, GAME STILL WAITING FOR THIS 
 
             int prevRow = p->row;
             int prevCol = p->col;

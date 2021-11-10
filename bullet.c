@@ -56,7 +56,9 @@ void *runEnemyBullet(void *data) {
         if(eb->row == eb->p->row-1 && (eb->col == eb->p->col || eb->col == eb->p->col+1 || eb->col == eb->p->col+2 || eb->col == eb->p->col+3 || eb->col == eb->p->col+4)) {
             // The player got hit by the bullet
             killPlayer(eb->p);
-            consoleClearImage(eb->row, eb->col, BULLET_SIZE, BULLET_SIZE); // Clear
+            wrappedMutexLock(eb->mutex);
+            consoleClearImage(eb->row, eb->col, BULLET_SIZE, BULLET_SIZE); // Clear bullet when it hits the player
+            wrappedMutexUnlock(eb->mutex);
             break;
         }
 

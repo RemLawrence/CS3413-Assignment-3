@@ -4,7 +4,7 @@
 
   Contains all the functions related to the player, including initializing
   a new player, initialize the player thread function, player animation, 
-  
+
 
 **********************************************************************/
 
@@ -118,5 +118,6 @@ void *runPlayerT(void *data)
 
 void killPlayer(player* p) {
 	p->lives--;
+	// Instead of p->lives--, change player state to DEAD and call a freeze screen method?
 	// TODO: and freeze screen
 }
