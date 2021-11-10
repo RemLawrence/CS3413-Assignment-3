@@ -95,10 +95,10 @@ void *runPlayerT(void *data)
 		switch(p->state)
 		{
 			case DEAD:
-				wrappedMutexLock(p->mutex);
+				//wrappedMutexLock(p->mutex);
 				p->lives--;
-				wrappedMutexUnlock(p->mutex);
-				//...other code here...
+				//wrappedMutexUnlock(p->mutex);
+				//TODO: Freeze screen
 			default:
 				;
 		}
