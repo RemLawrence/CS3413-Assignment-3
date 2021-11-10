@@ -64,42 +64,43 @@ void *runEnemy(void *data) {
 
             wrappedMutexLock(e->mutex);
             // e->startRow is the previous row, -(e->col+j) is the previous centipede col location
-            consoleClearImage(e->startRow, -(e->col+j), ENEMY_HEIGHT, ENEMY_WIDTH); 
+            consoleClearImage(e->startRow, -j, ENEMY_HEIGHT, ENEMY_WIDTH); 
             // e->startRow is the previous row, -(e->col+j+2) is the previous centipede col location - 2
             // to make the marker think it's still running on the previous row, KEKW
-		    consoleDrawImage(e->startRow, -(e->col+j+2), tile_left, ENEMY_HEIGHT);
+		    consoleDrawImage(e->startRow, -(j+2), tile_left, ENEMY_HEIGHT);
             wrappedMutexUnlock(e->mutex);
 
             wrappedMutexLock(e->mutex);
             consoleClearImage(e->row, -(e->length)+j, ENEMY_HEIGHT, ENEMY_WIDTH); // Clear
             consoleDrawImage(e->row, -(e->length)+j+1, tile_right, ENEMY_HEIGHT); // Draw
             wrappedMutexUnlock(e->mutex);
+            e->col = j;
 
             srand(time(NULL));   // Initialization, should only be called once.
             if(rand()%8 == 0) {
                 // Returns a pseudo-random integer between 0 and RAND_MAX.
-                spawnEnemyBullet(e->row+1, j, e->p, e->mutex);
+                //spawnEnemyBullet(e->row+1, e->col, e->p, e->mutex);
             }
 
-            BulletNode *bulletList = getBulletQueue();
+            // BulletNode *bulletList = getBulletQueue();
             
-            if(bulletList != NULL) {
-                while(bulletList->next != NULL) {
-                    if(bulletList->pb != NULL) {
-                        if(bulletList->pb->row == e->row && (bulletList->pb->col >= -(e->length)+j+1 && bulletList->pb->col <= j)) {
-                            // TODO: Split the enemy
-                            wrappedMutexLock(e->mutex);
-                            consoleClearImage(bulletList->pb->row, bulletList->pb->col, BULLET_SIZE, BULLET_SIZE); // Clear bullet when it hits the player
-                            wrappedMutexUnlock(e->mutex);
-                        }
-                        bulletList = bulletList->next; //iterate throught the linked list
-                    }
-                }
-            }
+            // if(bulletList != NULL) {
+            //     while(bulletList->next != NULL) {
+            //         if(bulletList->pb != NULL) {
+            //             if(bulletList->pb->row == e->row && (bulletList->pb->col >= -(e->length)+j+1 && bulletList->pb->col <= j)) {
+            //                 // TODO: Split the enemy
+            //                 wrappedMutexLock(e->mutex);
+            //                 consoleClearImage(bulletList->pb->row, bulletList->pb->col, BULLET_SIZE, BULLET_SIZE); // Clear bullet when it hits the player
+            //                 wrappedMutexUnlock(e->mutex);
+            //             }
+            //             bulletList = bulletList->next; //iterate throught the linked list
+            //         }
+            //     }
+            // }
 
-            if(e->col+j >= 80) {
+            if(j >= 80) {
                 // The centipede is gonna taking a turn to the next row (new direction: left)
-                e->col = e->col+j; // Update e->col to value 80, here, actually.
+                e->col = j; // Update e->col to value 80, here, actually.
                 e->startRow = e->row; //Update startRow. startRow? More like prevRow!
                 if(e->row != LAST_ROW) {
                     e->row = e->row + 2; // Get it to the next row
@@ -130,34 +131,18 @@ void *runEnemy(void *data) {
             }
 
             wrappedMutexLock(e->mutex);
-            consoleClearImage(e->row, e->col-i, ENEMY_HEIGHT, ENEMY_WIDTH); // e->startCol-i is the current centipede location
-		    consoleDrawImage(e->row, e->col-i-2, tile_left, ENEMY_HEIGHT);
+            consoleClearImage(e->row, e->col, ENEMY_HEIGHT, ENEMY_WIDTH); // e->startCol-i is the current centipede location
+            e->col = COL_BOUNDARY-i-2;
+		    consoleDrawImage(e->row, e->col, tile_left, ENEMY_HEIGHT);
             wrappedMutexUnlock(e->mutex);
-
-            BulletNode *bulletList = getBulletQueue();
-            
-            if(bulletList != NULL) {
-                while(bulletList->next != NULL) {
-                    if(bulletList->pb != NULL) {
-                        if(bulletList->pb->row == e->row && (bulletList->pb->col >= e->col-i && bulletList->pb->col <= e->col-i+ENEMY_WIDTH)) {
-                            // TODO: Split the enemy
-                            wrappedMutexLock(bulletList->pb->mutex);
-                            consoleClearImage(bulletList->pb->row, bulletList->pb->col, BULLET_SIZE, BULLET_SIZE); // Clear bullet when it hits the player
-                            wrappedMutexUnlock(bulletList->pb->mutex);
-                            printf("afd");
-                        }
-                        bulletList = bulletList->next; //iterate throught the linked list
-                    }
-                }
-            }
 
             srand(time(NULL));   // Initialization, should only be called once.
             if(rand()%8 == 0) {
                 // Returns a pseudo-random integer between 0 and RAND_MAX.
-                spawnEnemyBullet(e->row+2, e->col-i-2, e->p, e->mutex);
+                //spawnEnemyBullet(e->row+2, e->col, e->p, e->mutex);
             }  
             
-            if(e->col-i-2 <= 0) {
+            if(e->col <= 0) {
                 // If the enemy hit the left wall in the last turn
                 e->col = e->col-i-2; // Update e->col to value 0, here, actually.
                 e->startRow = e->row; //Update startRow. startRow? More like prevRow!
