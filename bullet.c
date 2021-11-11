@@ -77,6 +77,23 @@ void *runPlayerBullet(void *data) {
         // and not being consumed...
         char** player_bullet_tile = PLAYER_BULLET[BULLET_ANIM_TILES-1];
 
+        enemyNode *enemyList = getEnemyQueue();
+        while(enemyList != NULL) {
+            if(strcmp(enemyList->e->direction, "left") == 0) {
+                if(pb->row == enemyList->e->row && (pb->col >= enemyList->e->col && pb->col <= enemyList->e->col + enemyList->e->length)){
+                    printf("left");
+                    pthread_exit(NULL);
+                }
+            }
+            else { //right
+                if(pb->row == enemyList->e->row && (pb->col <= enemyList->e->col && pb->col >= enemyList->e->col - enemyList->e->length)){
+                    printf("right");
+                    pthread_exit(NULL);
+                }
+            }
+            enemyList = enemyList->next;
+        }
+
         wrappedMutexLock(pb->mutex);
         consoleClearImage(pb->row, pb->col, BULLET_SIZE, BULLET_SIZE); // Clear
        
@@ -91,6 +108,7 @@ void *runPlayerBullet(void *data) {
 
         consoleDrawImage(pb->row, pb->col, player_bullet_tile, BULLET_SIZE); // Draw
         wrappedMutexUnlock(pb->mutex);
+
         sleepTicks(6); // Speed of the bullet
     }
     //TODO: delete this bullet from linked list

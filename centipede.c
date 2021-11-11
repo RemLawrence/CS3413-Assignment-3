@@ -162,7 +162,7 @@ void *runConsoleRefresh(void *data) {
 
 void *runSpawnThread(void *data) {
         player* p = (player*)data;
-        spawnEnemy(2, 80, p, &screenLock);
+        spawnEnemy(2, 80, ENEMY_WIDTH, p, &screenLock);
         pthread_exit(NULL);
 }
 

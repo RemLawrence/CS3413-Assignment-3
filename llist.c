@@ -9,7 +9,7 @@ enemyNode* enemyQueue;
 bool bulletQInitialized = false;
 BulletNode *bulletQueue;
 
-void spawnEnemy(int startRow, int startCol, player *p, pthread_mutex_t *screenLock)
+void spawnEnemy(int startRow, int startCol, int length, player *p, pthread_mutex_t *screenLock)
 {
     bool first = true;
     
@@ -24,7 +24,7 @@ void spawnEnemy(int startRow, int startCol, player *p, pthread_mutex_t *screenLo
 
         e->direction = "left";
 
-        e->length = ENEMY_WIDTH; // Length of the enemy body. Could be deducted when hit!
+        e->length = length; // Length of the enemy body. Could be deducted when hit!
 
         e->mutex = screenLock; // A reference to the screenlock
         e->p = p; // A reference to the player
