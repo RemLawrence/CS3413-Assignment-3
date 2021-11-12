@@ -41,9 +41,8 @@ void newEnemy(enemy *e)
 }
 
 char** cutEnemyBody(char** enemyBody, int length, char* direction) {
-    char newEnemyBody[ENEMY_HEIGHT+1][length+1];
-    char** body = (char**)(malloc(1000*sizeof(char**)));
-
+    char newEnemyBody[ENEMY_HEIGHT+1][length+3];
+    char** body = (char**)(malloc(sizeof(char)));
     if(strcmp(direction, "left") == 0) {
         int i = 0;
         int j = 0;
@@ -51,22 +50,27 @@ char** cutEnemyBody(char** enemyBody, int length, char* direction) {
             for (j = 0; j < length; j++) {
                 newEnemyBody[i][j] = enemyBody[i][j]; // char level assign
             }
+            // newEnemyBody[i][j+1] = '\\';
+            // newEnemyBody[i][j+2] = '0';
             body[i] = newEnemyBody[i];
         }
     }
-    else {
+    else if(strcmp(direction, "right") == 0) {
         int i = ENEMY_HEIGHT-1;
         int j = length-1;
         for (i = ENEMY_HEIGHT-1; i >= 0; i--) {
+            // newEnemyBody[i][j+1] = '\\';
+            // newEnemyBody[i][j+2] = '0';
             int z = ENEMY_WIDTH-1;
             for (j = length-1; j >= 0; j--) {
                 newEnemyBody[i][j] = enemyBody[i][z]; // char level assign
                 z--;
             }
             body[i] = newEnemyBody[i];
-        }
-        //printf("%s\n", newEnemyBody[1]);
+        }   
     }
+    //printf("%s\n", body[0]);
+    
     body[2] = "\0";
     return body;
 }
@@ -75,6 +79,7 @@ char** cutEnemyBody(char** enemyBody, int length, char* direction) {
 void *runEnemy(void *data) {
     // Pass the reference to the player p
 	enemy* e = (enemy*)data;
+
 	/* RESET the player state to start */
 	newEnemy(e);
 
@@ -82,8 +87,14 @@ void *runEnemy(void *data) {
     int j = 0; // aka. rightIncrementor
 
     while(e->p->running && e->p->lives > 0) {
-        char** tile_left;
-        char** tile_right;
+
+        if(e->length <= 4) {
+            e->isDead = true;
+            pthread_exit(NULL);
+        }
+
+        char** tile_left = (char**)(malloc(sizeof(char)));
+        char** tile_right = (char**)(malloc(sizeof(char)));
         if(e->length == ENEMY_WIDTH) {
             // If the enemy has a width of exactly 80, then it hasen't been hit just yet.
             tile_left = ENEMY_BODY_LEFT[i%ENEMY_BODY_ANIM_TILES];
@@ -94,7 +105,7 @@ void *runEnemy(void *data) {
             // The enemy is hit and needs to have the anim tiles cut off.
             tile_left = cutEnemyBody(ENEMY_BODY_LEFT[i%ENEMY_BODY_ANIM_TILES], e->length, "left");
             tile_right = cutEnemyBody(ENEMY_BODY_RIGHT[j%ENEMY_BODY_ANIM_TILES], e->length, "right");
-            printf("%s\n", tile_left[0]);
+            //printf("%s\n", tile_left[1]);
         }
 
         //probably not threadsafe here...
@@ -106,17 +117,17 @@ void *runEnemy(void *data) {
 
             wrappedMutexLock(e->mutex);
             // e->startRow is the previous row, -(e->col+j) is the previous centipede col location
-            consoleClearImage(e->startRow, -j, ENEMY_HEIGHT, ENEMY_WIDTH); 
+            consoleClearImage(e->startRow, -j, ENEMY_HEIGHT, e->length); 
             // e->startRow is the previous row, -(e->col+j+2) is the previous centipede col location - 2
             // to make the marker think it's still running on the previous row, KEKW
 		    consoleDrawImage(e->startRow, -(j+2), tile_left, ENEMY_HEIGHT);
             wrappedMutexUnlock(e->mutex);
 
             wrappedMutexLock(e->mutex);
-            consoleClearImage(e->row, -(e->length)+j, ENEMY_HEIGHT, ENEMY_WIDTH); // Clear
+            consoleClearImage(e->row, -(e->length)+j, ENEMY_HEIGHT, e->length); // Clear
             consoleDrawImage(e->row, -(e->length)+j+1, tile_right, ENEMY_HEIGHT); // Draw
             wrappedMutexUnlock(e->mutex);
-            e->col = j;
+            e->col = j; // Update e->col's position
 
             srand(time(NULL));   // Initialization, should only be called once.
             if(rand()%8 == 0) {
@@ -150,7 +161,7 @@ void *runEnemy(void *data) {
                 wrappedMutexLock(e->mutex);
                 // e->row-2 is the previous row, e->startCol-i is the previous centipede col location
                 //printf("e->startRow %d\n", e->startRow);
-                consoleClearImage(e->startRow, COL_BOUNDARY-e->length+i, ENEMY_HEIGHT, ENEMY_WIDTH); 
+                consoleClearImage(e->startRow, COL_BOUNDARY-e->length+i, ENEMY_HEIGHT, e->length); 
                 // e->row-2 is the previous row, e->startCol-i-2 is the previous centipede col location - 2
                 // to make the marker think it's still running on the previous row, KEKW
                 consoleDrawImage(e->startRow, COL_BOUNDARY-e->length+i+2, tile_right, ENEMY_HEIGHT);
@@ -158,8 +169,8 @@ void *runEnemy(void *data) {
             }
 
             wrappedMutexLock(e->mutex);
-            consoleClearImage(e->row, e->col, ENEMY_HEIGHT, ENEMY_WIDTH); // e->startCol-i is the current centipede location
-            e->col = COL_BOUNDARY-i-2;
+            consoleClearImage(e->row, e->col, ENEMY_HEIGHT, e->length); // e->startCol-i is the current centipede location
+            e->col = COL_BOUNDARY-i-2; // Update e->col's position
 		    consoleDrawImage(e->row, e->col, tile_left, ENEMY_HEIGHT);
             wrappedMutexUnlock(e->mutex);
 
