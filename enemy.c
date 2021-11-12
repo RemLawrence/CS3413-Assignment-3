@@ -104,15 +104,15 @@ void *runEnemy(void *data) {
                 // The enemy is hit and needs to have the anim tiles cut off.
                 int height_index, width_index;
                 for(height_index = 0; height_index < ENEMY_HEIGHT; height_index++) {
-                    char body_left[2][81];
+                    char body_right[2][81];
                     int z = 0;
                     for (width_index = 80-e->length; width_index < 80; width_index++) {
-                        body_left[height_index][z] = tile_left[height_index][width_index];
+                        body_right[height_index][z] = tile_right[height_index][width_index];
                         z++;
                     }
                     //printf("%s\n", body_left[0]);
-                    body_left[height_index][z+1] = '\0';
-                    tile_left[height_index] = body_left[height_index];
+                    body_right[height_index][z+1] = '\0';
+                    tile_right[height_index] = body_right[height_index];
                 }
                 // tile_left = cutEnemyBody(ENEMY_BODY_LEFT[i%ENEMY_BODY_ANIM_TILES], e->length, "left");
                 // tile_right = cutEnemyBody(ENEMY_BODY_RIGHT[j%ENEMY_BODY_ANIM_TILES], e->length, "right");
