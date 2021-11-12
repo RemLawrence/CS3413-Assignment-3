@@ -31,7 +31,7 @@ char* ENEMY_BODY_RIGHT[ENEMY_BODY_ANIM_TILES][ENEMY_HEIGHT] =
    ";,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;="}
 };
 
-/********************support functions***************
+/********************support functions****************/
 /* reset the enemy state to start */
 void newEnemy(enemy *e) 
 {
@@ -41,16 +41,17 @@ void newEnemy(enemy *e)
 }
 
 char** cutEnemyBody(char** enemyBody, int length, char* direction) {
-    //char newEnemyBody[ENEMY_HEIGHT][length];
-    char **newEnemyBody = (char**)(malloc(sizeof(char**)));
+    char newEnemyBody[ENEMY_HEIGHT+1][length+1];
+    char** body = (char**)(malloc(1000*sizeof(char**)));
 
     if(strcmp(direction, "left") == 0) {
         int i = 0;
         int j = 0;
         for (i = 0; i < ENEMY_HEIGHT; i++) {
             for (j = 0; j < length; j++) {
-                printf("%c\n", enemyBody[i][j]); // char level assign
+                newEnemyBody[i][j] = enemyBody[i][j]; // char level assign
             }
+            body[i] = newEnemyBody[i];
         }
     }
     else {
@@ -62,9 +63,12 @@ char** cutEnemyBody(char** enemyBody, int length, char* direction) {
                 newEnemyBody[i][j] = enemyBody[i][z]; // char level assign
                 z--;
             }
+            body[i] = newEnemyBody[i];
         }
+        //printf("%s\n", newEnemyBody[1]);
     }
-    return newEnemyBody;
+    body[2] = "\0";
+    return body;
 }
 
 /********************THREAD functions***************/
@@ -84,11 +88,13 @@ void *runEnemy(void *data) {
             // If the enemy has a width of exactly 80, then it hasen't been hit just yet.
             tile_left = ENEMY_BODY_LEFT[i%ENEMY_BODY_ANIM_TILES];
             tile_right = ENEMY_BODY_RIGHT[j%ENEMY_BODY_ANIM_TILES];
+            
         }
         else {
             // The enemy is hit and needs to have the anim tiles cut off.
             tile_left = cutEnemyBody(ENEMY_BODY_LEFT[i%ENEMY_BODY_ANIM_TILES], e->length, "left");
             tile_right = cutEnemyBody(ENEMY_BODY_RIGHT[j%ENEMY_BODY_ANIM_TILES], e->length, "right");
+            printf("%s\n", tile_left[0]);
         }
 
         //probably not threadsafe here...
@@ -138,7 +144,7 @@ void *runEnemy(void *data) {
             
         }
         else {
-            //printf("%c\n", tile_left[0][0]);
+            //printf("%s\n", tile_left[0]);
             if(e->row != ENEMY_FIRST_ROW) {
                 //If e-> row does not equal to 2, then the centipede is not on the first row
                 wrappedMutexLock(e->mutex);
@@ -183,10 +189,16 @@ void *runEnemy(void *data) {
 
         if(e->isHit) {
             // Catch the isHit signal from player bullet thread, consume it by increasing the speed of this enemy.
-            e->speed = e->speed/2;
+            if(e->speed == ENEMY_SPEED/2){
+
+            }
+            else {
+                e->speed = e->speed/2;
+            }
             e->isHit = false;
         }
-
+        // free(tile_left);
+        // free(tile_right);
 		sleepTicks(e->speed);
 	}
     // free(tile_left);
