@@ -41,8 +41,9 @@ void newEnemy(enemy *e)
 }
 
 char** cutEnemyBody(char** enemyBody, int length, char* direction) {
-    char newEnemyBody[ENEMY_HEIGHT+1][length+3];
+    char newEnemyBody[ENEMY_HEIGHT+1][length+2];
     char** body = (char**)(malloc(sizeof(char)));
+
     if(strcmp(direction, "left") == 0) {
         int i = 0;
         int j = 0;
@@ -50,8 +51,7 @@ char** cutEnemyBody(char** enemyBody, int length, char* direction) {
             for (j = 0; j < length; j++) {
                 newEnemyBody[i][j] = enemyBody[i][j]; // char level assign
             }
-            // newEnemyBody[i][j+1] = '\\';
-            // newEnemyBody[i][j+2] = '0';
+            newEnemyBody[i][j+1] = '\0';
             body[i] = newEnemyBody[i];
         }
     }
@@ -59,8 +59,7 @@ char** cutEnemyBody(char** enemyBody, int length, char* direction) {
         int i = ENEMY_HEIGHT-1;
         int j = length-1;
         for (i = ENEMY_HEIGHT-1; i >= 0; i--) {
-            // newEnemyBody[i][j+1] = '\\';
-            // newEnemyBody[i][j+2] = '0';
+            newEnemyBody[i][j+1] = '\0';
             int z = ENEMY_WIDTH-1;
             for (j = length-1; j >= 0; j--) {
                 newEnemyBody[i][j] = enemyBody[i][z]; // char level assign
@@ -105,7 +104,7 @@ void *runEnemy(void *data) {
             // The enemy is hit and needs to have the anim tiles cut off.
             tile_left = cutEnemyBody(ENEMY_BODY_LEFT[i%ENEMY_BODY_ANIM_TILES], e->length, "left");
             tile_right = cutEnemyBody(ENEMY_BODY_RIGHT[j%ENEMY_BODY_ANIM_TILES], e->length, "right");
-            //printf("%s\n", tile_left[1]);
+            printf("%s\n", tile_left[0]);
         }
 
         //probably not threadsafe here...

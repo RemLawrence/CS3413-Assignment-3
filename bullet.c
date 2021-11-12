@@ -86,16 +86,16 @@ void *runPlayerBullet(void *data) {
             if(strcmp(enemyList->e->direction, "left") == 0) {
                 if(pb->row == enemyList->e->row+2 && (pb->col >= enemyList->e->col && pb->col <= enemyList->e->col + enemyList->e->length)){
                     enemyList->e->isHit = true;
-                    enemyList->e->length = pb->col - enemyList->e->col;
-                    spawnEnemy(enemyList->e->row, pb->col, enemyList->e->length-(pb->col - enemyList->e->col), pb->p, pb->mutex); // Spawn a new enemy on the pb cut
+                    //spawnEnemy(enemyList->e->row, pb->col, enemyList->e->length-(pb->col - enemyList->e->col), pb->p, pb->mutex); // Spawn a new enemy on the pb cut
+                    enemyList->e->length = pb->col - enemyList->e->col; // Update previous enemy's length
                     pthread_exit(NULL);
                 }
             }
             else { //right
                 if(pb->row == enemyList->e->row+2 && (pb->col <= enemyList->e->col && pb->col >= enemyList->e->col - enemyList->e->length)){
                     enemyList->e->isHit = true;
-                    enemyList->e->length = enemyList->e->col - pb->col;
                     spawnEnemy(enemyList->e->row, pb->col, enemyList->e->length-(enemyList->e->col - pb->col), pb->p, pb->mutex);
+                    enemyList->e->length = enemyList->e->col - pb->col; // Update previous enemy's length
                     pthread_exit(NULL);
                 }
             }
