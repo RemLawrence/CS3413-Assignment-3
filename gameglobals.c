@@ -22,16 +22,12 @@ void *runUpkeep(void *data) {
         while(bulletList != NULL) {
                 if(bulletList->eb != NULL) {
                     if(bulletList->eb->isDead) {
-                        pthread_cancel(bulletList->eb->thread);
-                        pthread_join(bulletList->eb->thread, NULL);
-                        free(bulletList->eb);
+                        deleteBullet(NULL, bulletList->eb);
                     }
                 }
                 else if(bulletList->pb != NULL) {
                     if(bulletList->pb->isDead) {
-                        pthread_cancel(bulletList->pb->thread);
-                        pthread_join(bulletList->pb->thread, NULL);
-                        free(bulletList->pb);
+                        deleteBullet(bulletList->pb, NULL);
                     }
                 }
                 bulletList = bulletList -> next;

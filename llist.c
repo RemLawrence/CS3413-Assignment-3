@@ -3,10 +3,10 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <pthread.h>
 
 enemyNode* enemyQueue;
 
-bool bulletQInitialized = false;
 BulletNode *bulletQueue;
 
 void spawnEnemy(int startRow, int startCol, int length, char* direction, player *p, pthread_mutex_t *screenLock)
@@ -74,9 +74,8 @@ void spawnEnemyBullet(int startRow, int startCol, player *p, pthread_mutex_t *sc
 	eb->mutex = screenLock;
     eb->p = p;
 
-    if (!bulletQInitialized) {
+    if (bulletQueue == NULL) {
         bulletQueue = createBulletQueue(NULL, eb);
-        bulletQInitialized = true;
     }
     else {
         insertBulletQueue(NULL, eb, bulletQueue);
@@ -95,9 +94,8 @@ void spawnPlayerBullet(int startRow, int startCol, player *p, pthread_mutex_t *s
 	pb->mutex = screenLock;
     pb->p = p;
 
-    if (!bulletQInitialized) {
+    if (bulletQueue == NULL) {
         bulletQueue = createBulletQueue(pb, NULL);
-        bulletQInitialized = true;
     }
     else {
         insertBulletQueue(pb, NULL, bulletQueue);
@@ -124,7 +122,77 @@ void insertBulletQueue(playerBullet *pb, enemyBullet *eb, BulletNode *BulletQueu
     BulletQueue->next = newBulletQueue;
 }
 
-//void deleteBullet()
+void deleteBullet(playerBullet *pb, enemyBullet *eb) {
+    if(pb != NULL) {
+        // Delete a player bullet
+        if(bulletQueue->pb->thread == pb->thread) {
+            // head is the player bullet we wanna delete
+            if(bulletQueue->next == NULL) {
+                bulletQueue = NULL;
+            }
+            else {
+                bulletQueue = bulletQueue -> next;
+            }
+            pthread_cancel(pb->thread);
+            pthread_join(pb->thread, NULL);
+            free(pb);
+            printf("really?1");
+        }
+        else {
+            // the bullet we wanna delete it not the head
+            while(bulletQueue->next != NULL) {
+                if(bulletQueue->next->pb->thread == pb->thread) {
+                    if(bulletQueue -> next -> next == NULL) {
+                        bulletQueue->next = NULL;
+                    }
+                    else {
+                        bulletQueue->next = bulletQueue -> next -> next;
+                    }
+                    pthread_cancel(pb->thread);
+                    pthread_join(pb->thread, NULL);
+                    free(pb);
+                    break;
+                }
+            }
+            printf("really?2");
+        }
+    }
+    else if(eb != NULL) {
+        // Delete an enemy bullet
+        if(bulletQueue->eb->thread == eb->thread) {
+            // head is the player bullet we wanna delete
+            if(bulletQueue->next == NULL) {
+                bulletQueue = NULL;
+            }
+            else {
+                bulletQueue = bulletQueue -> next;
+            }
+            pthread_cancel(eb->thread);
+            pthread_join(eb->thread, NULL);
+            free(eb);
+            printf("really?3");
+        }
+        else {
+            // the bullet we wanna delete it not the head
+            while(bulletQueue->next != NULL) {
+                if(bulletQueue->next->eb->thread == eb->thread) {
+                    if(bulletQueue -> next -> next == NULL) {
+                        bulletQueue->next = NULL;
+                    }
+                    else {
+                        bulletQueue->next = bulletQueue -> next -> next;
+                    }
+                    pthread_cancel(eb->thread);
+                    pthread_join(eb->thread, NULL);
+                    free(eb);
+                    printf("really?4");
+                    break;
+                }
+            }
+        }
+    }
+    
+}
 
 BulletNode* getBulletQueue() {
     return bulletQueue;
