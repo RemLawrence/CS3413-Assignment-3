@@ -42,14 +42,14 @@ void newEnemy(enemy *e)
 
 char** cutEnemyBody(char** enemyBody, int length, char* direction) {
     //char newEnemyBody[ENEMY_HEIGHT][length];
-    char **newEnemyBody = (char**)(malloc(sizeof(char)));
+    char **newEnemyBody = (char**)(malloc(sizeof(char**)));
 
     if(strcmp(direction, "left") == 0) {
         int i = 0;
         int j = 0;
         for (i = 0; i < ENEMY_HEIGHT; i++) {
             for (j = 0; j < length; j++) {
-                newEnemyBody[i][j] = enemyBody[i][j]; // char level assign
+                printf("%c\n", enemyBody[i][j]); // char level assign
             }
         }
     }
@@ -77,11 +77,9 @@ void *runEnemy(void *data) {
 	int i = 0; // aka. leftIncrementor
     int j = 0; // aka. rightIncrementor
 
-    char** tile_left = (char**)(malloc(sizeof(char)));
-    char** tile_right = (char**)(malloc(sizeof(char)));
-
     while(e->p->running && e->p->lives > 0) {
-        
+        char** tile_left;
+        char** tile_right;
         if(e->length == ENEMY_WIDTH) {
             // If the enemy has a width of exactly 80, then it hasen't been hit just yet.
             tile_left = ENEMY_BODY_LEFT[i%ENEMY_BODY_ANIM_TILES];
@@ -191,7 +189,7 @@ void *runEnemy(void *data) {
 
 		sleepTicks(e->speed);
 	}
-    free(tile_left);
-    free(tile_right);
+    // free(tile_left);
+    // free(tile_right);
     pthread_exit(NULL);	
 }
