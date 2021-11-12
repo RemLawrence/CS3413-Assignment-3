@@ -1,3 +1,7 @@
+//1. Cut 2d string array
+//2. Catch isHit in enemy thread, cut off its body and accelerate, turn the isHit flag off
+//3. spawnEnemy() in bullet thread?, initialize start row & col, length, form a new enemy.
+
 #include "bullet.h"
 #include "llist.h"
 #include <stdio.h>
@@ -80,14 +84,18 @@ void *runPlayerBullet(void *data) {
         enemyNode *enemyList = getEnemyQueue();
         while(enemyList != NULL) {
             if(strcmp(enemyList->e->direction, "left") == 0) {
-                if(pb->row == enemyList->e->row && (pb->col >= enemyList->e->col && pb->col <= enemyList->e->col + enemyList->e->length)){
-                    printf("left");
+                if(pb->row == enemyList->e->row-1 && (pb->col >= enemyList->e->col && pb->col <= enemyList->e->col + enemyList->e->length)){
+                    enemyList->e->isHit = true;
+                    enemyList->e->length = pb->col - enemyList->e->col;
+                    spawnEnemy(enemyList->e->row, pb->col, enemyList->e->length-(pb->col - enemyList->e->col), pb->p, pb->mutex); // Spawn a new enemy on the pb cut
                     pthread_exit(NULL);
                 }
             }
             else { //right
-                if(pb->row == enemyList->e->row && (pb->col <= enemyList->e->col && pb->col >= enemyList->e->col - enemyList->e->length)){
-                    printf("right");
+                if(pb->row == enemyList->e->row-1 && (pb->col <= enemyList->e->col && pb->col >= enemyList->e->col - enemyList->e->length)){
+                    enemyList->e->isHit = true;
+                    enemyList->e->length = enemyList->e->col - pb->col;
+                    spawnEnemy(enemyList->e->row, pb->col, enemyList->e->length-(enemyList->e->col - pb->col), pb->p, pb->mutex);
                     pthread_exit(NULL);
                 }
             }
@@ -96,16 +104,15 @@ void *runPlayerBullet(void *data) {
 
         wrappedMutexLock(pb->mutex);
         consoleClearImage(pb->row, pb->col, BULLET_SIZE, BULLET_SIZE); // Clear
-       
         if(pb->row <= UPPER_BOUNDARY) {
             // If the bullet get passed enemy and is out of the boundary
             wrappedMutexUnlock(pb->mutex);
             break;
         }
         else {
+            // Player bullet continues to go upwards.
             pb->row = pb->row-1;
         }
-
         consoleDrawImage(pb->row, pb->col, player_bullet_tile, BULLET_SIZE); // Draw
         wrappedMutexUnlock(pb->mutex);
 

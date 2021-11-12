@@ -25,6 +25,7 @@ void spawnEnemy(int startRow, int startCol, int length, player *p, pthread_mutex
         e->direction = "left";
 
         e->length = length; // Length of the enemy body. Could be deducted when hit!
+        e->speed = ENEMY_SPEED; // Initialize the enemy speed to 40
 
         e->mutex = screenLock; // A reference to the screenlock
         e->p = p; // A reference to the player

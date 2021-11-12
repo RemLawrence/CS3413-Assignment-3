@@ -38,7 +38,33 @@ void newEnemy(enemy *e)
 	e->row = e->startRow;
 	e->col = e->startCol;
 	e->animTile = 0;
-	//p->state = GAME;
+}
+
+char** cutEnemyBody(char** enemyBody, int length, char* direction) {
+    //char newEnemyBody[ENEMY_HEIGHT][length];
+    char **newEnemyBody = (char**)(malloc(sizeof(char)));
+
+    if(strcmp(direction, "left") == 0) {
+        int i = 0;
+        int j = 0;
+        for (i = 0; i < ENEMY_HEIGHT; i++) {
+            for (j = 0; j < length; j++) {
+                newEnemyBody[i][j] = enemyBody[i][j]; // char level assign
+            }
+        }
+    }
+    else {
+        int i = ENEMY_HEIGHT-1;
+        int j = length-1;
+        for (i = ENEMY_HEIGHT-1; i >= 0; i--) {
+            int z = ENEMY_WIDTH-1;
+            for (j = length-1; j >= 0; j--) {
+                newEnemyBody[i][j] = enemyBody[i][z]; // char level assign
+                z--;
+            }
+        }
+    }
+    return newEnemyBody;
 }
 
 /********************THREAD functions***************/
@@ -51,9 +77,21 @@ void *runEnemy(void *data) {
 	int i = 0; // aka. leftIncrementor
     int j = 0; // aka. rightIncrementor
 
+    char** tile_left = (char**)(malloc(sizeof(char)));
+    char** tile_right = (char**)(malloc(sizeof(char)));
+
     while(e->p->running && e->p->lives > 0) {
-		char** tile_left = ENEMY_BODY_LEFT[i%ENEMY_BODY_ANIM_TILES];
-        char** tile_right = ENEMY_BODY_RIGHT[j%ENEMY_BODY_ANIM_TILES];
+        
+        if(e->length == ENEMY_WIDTH) {
+            // If the enemy has a width of exactly 80, then it hasen't been hit just yet.
+            tile_left = ENEMY_BODY_LEFT[i%ENEMY_BODY_ANIM_TILES];
+            tile_right = ENEMY_BODY_RIGHT[j%ENEMY_BODY_ANIM_TILES];
+        }
+        else {
+            // The enemy is hit and needs to have the anim tiles cut off.
+            tile_left = cutEnemyBody(ENEMY_BODY_LEFT[i%ENEMY_BODY_ANIM_TILES], e->length, "left");
+            tile_right = cutEnemyBody(ENEMY_BODY_RIGHT[j%ENEMY_BODY_ANIM_TILES], e->length, "right");
+        }
 
         //probably not threadsafe here...
         //start centipede at tile 2, 80, move it horizontally once a frame/tick
@@ -82,23 +120,7 @@ void *runEnemy(void *data) {
                 spawnEnemyBullet(e->row+1, e->col, e->p, e->mutex);
             }
 
-            // BulletNode *bulletList = getBulletQueue();
-            
-            // if(bulletList != NULL) {
-            //     while(bulletList->next != NULL) {
-            //         if(bulletList->pb != NULL) {
-            //             if(bulletList->pb->row == e->row && (bulletList->pb->col >= -(e->length)+j+1 && bulletList->pb->col <= j)) {
-            //                 // TODO: Split the enemy
-            //                 wrappedMutexLock(e->mutex);
-            //                 consoleClearImage(bulletList->pb->row, bulletList->pb->col, BULLET_SIZE, BULLET_SIZE); // Clear bullet when it hits the player
-            //                 wrappedMutexUnlock(e->mutex);
-            //             }
-            //             bulletList = bulletList->next; //iterate throught the linked list
-            //         }
-            //     }
-            // }
-
-            if(j >= 80) {
+            if(j >= COL_BOUNDARY) {
                 // The centipede is gonna taking a turn to the next row (new direction: left)
                 e->col = j; // Update e->col to value 80, here, actually.
                 e->startRow = e->row; //Update startRow. startRow? More like prevRow!
@@ -118,7 +140,8 @@ void *runEnemy(void *data) {
             
         }
         else {
-            if(e->row != 2) {
+            //printf("%c\n", tile_left[0][0]);
+            if(e->row != ENEMY_FIRST_ROW) {
                 //If e-> row does not equal to 2, then the centipede is not on the first row
                 wrappedMutexLock(e->mutex);
                 // e->row-2 is the previous row, e->startCol-i is the previous centipede col location
@@ -159,7 +182,16 @@ void *runEnemy(void *data) {
                 i++;
             }
         }
-		sleepTicks(40);
+
+        if(e->isHit) {
+            // Catch the isHit signal from player bullet thread, consume it by increasing the speed of this enemy.
+            e->speed = e->speed/2;
+            e->isHit = false;
+        }
+
+		sleepTicks(e->speed);
 	}
+    free(tile_left);
+    free(tile_right);
     pthread_exit(NULL);	
 }

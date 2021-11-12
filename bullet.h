@@ -21,7 +21,7 @@ typedef struct playerBullet_struct
     int animTile;
 
     bool hit;
-    bool outOfUpperBounds;
+    bool outOfUpperBounds; //TODO: delete it in upkeep thread
     
 	int row;
 	int col;
@@ -40,7 +40,7 @@ typedef struct enemyBullet_struct
     int animTile;
 
     bool hit;
-    bool outOfLowerBounds;
+    bool outOfLowerBounds; //TODO: delete it in upkeep thread
 
     player *p;
     
