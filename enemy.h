@@ -20,13 +20,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-// typedef enum playerState_enum 
-// {
-// 	GAME, // In game
-// 	DEAD, // Player dead
-// 	GAMEOVER // player win
-// } playerState; 
-
 typedef struct enemy_struct 
 {
 	/* remember the start parameters internally */

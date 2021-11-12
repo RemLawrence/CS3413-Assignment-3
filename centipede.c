@@ -193,12 +193,9 @@ void centipedeRun()
                 //that  waits on a condition variable until the game is over
                 //and coordinates all threads to end
 
-                	
-
                 //note after this the player thread keeps running and isn't cleaned
                 //up properly. Why don't we see it update on screen?
                 while(p->running && p->lives > 0) {
-
                 }
                 finalKeypress(); /* wait for final key before killing curses and game */
                 p->running = false;
@@ -208,9 +205,7 @@ void centipedeRun()
                 pthread_join(spawn_thread, NULL);
 
                 free(p);
-        }       
-        
+        }
         consoleFinish();
-        
 }
 

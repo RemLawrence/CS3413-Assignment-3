@@ -42,7 +42,8 @@ void newEnemy(enemy *e)
 
 char** cutEnemyBody(char** enemyBody, int length, char* direction) {
     char newEnemyBody[ENEMY_HEIGHT+1][length+2];
-    char** body = (char**)(malloc(sizeof(char)));
+    char** body_left = (char**)(malloc(sizeof(char)));
+    char** body_right = (char**)(malloc(sizeof(char)));
 
     if(strcmp(direction, "left") == 0) {
         int i = 0;
@@ -52,10 +53,12 @@ char** cutEnemyBody(char** enemyBody, int length, char* direction) {
                 newEnemyBody[i][j] = enemyBody[i][j]; // char level assign
             }
             newEnemyBody[i][j+1] = '\0';
-            body[i] = newEnemyBody[i];
+            body_left[i] = newEnemyBody[i];
         }
+        body_left[2] = "\0";
+        return body_left;
     }
-    else if(strcmp(direction, "right") == 0) {
+    else {
         int i = ENEMY_HEIGHT-1;
         int j = length-1;
         for (i = ENEMY_HEIGHT-1; i >= 0; i--) {
@@ -65,13 +68,11 @@ char** cutEnemyBody(char** enemyBody, int length, char* direction) {
                 newEnemyBody[i][j] = enemyBody[i][z]; // char level assign
                 z--;
             }
-            body[i] = newEnemyBody[i];
-        }   
+            body_right[i] = newEnemyBody[i];
+        }  
+        body_right[2] = "\0";
+        return body_right; 
     }
-    //printf("%s\n", body[0]);
-    
-    body[2] = "\0";
-    return body;
 }
 
 /********************THREAD functions***************/
@@ -102,9 +103,9 @@ void *runEnemy(void *data) {
         }
         else {
             // The enemy is hit and needs to have the anim tiles cut off.
-            tile_left = cutEnemyBody(ENEMY_BODY_LEFT[i%ENEMY_BODY_ANIM_TILES], e->length, "left");
             tile_right = cutEnemyBody(ENEMY_BODY_RIGHT[j%ENEMY_BODY_ANIM_TILES], e->length, "right");
-            printf("%s\n", tile_left[0]);
+            tile_left = cutEnemyBody(ENEMY_BODY_LEFT[i%ENEMY_BODY_ANIM_TILES], e->length, "left");
+            //printf("%s\n", tile_left[0]);
         }
 
         //probably not threadsafe here...
@@ -154,7 +155,6 @@ void *runEnemy(void *data) {
             
         }
         else {
-            //printf("%s\n", tile_left[0]);
             if(e->row != ENEMY_FIRST_ROW) {
                 //If e-> row does not equal to 2, then the centipede is not on the first row
                 wrappedMutexLock(e->mutex);
