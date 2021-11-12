@@ -5,5 +5,8 @@
 #include "bullet.h"
 
 #define BUF_SIZE 10
+#define UPKEEP_ROW 0
+#define SCORE_POS 29
+#define LIVES_POS 45
 
 void *runUpkeep(void *data);
