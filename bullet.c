@@ -84,15 +84,16 @@ void *runPlayerBullet(void *data) {
         enemyNode *enemyList = getEnemyQueue();
         while(enemyList != NULL) {
             if(strcmp(enemyList->e->direction, "left") == 0) {
-                if(pb->row == enemyList->e->row-1 && (pb->col >= enemyList->e->col && pb->col <= enemyList->e->col + enemyList->e->length)){
+                if(pb->row == enemyList->e->row+2 && (pb->col >= enemyList->e->col && pb->col <= enemyList->e->col + enemyList->e->length)){
                     enemyList->e->isHit = true;
-                    enemyList->e->length = pb->col - enemyList->e->col;
-                    spawnEnemy(enemyList->e->row, pb->col, enemyList->e->length-(pb->col - enemyList->e->col), pb->p, pb->mutex); // Spawn a new enemy on the pb cut
+                    printf("%d", enemyList->e->length);
+                    enemyList->e->length = 80;
+                    //spawnEnemy(enemyList->e->row, pb->col, enemyList->e->length-(pb->col - enemyList->e->col), pb->p, pb->mutex); // Spawn a new enemy on the pb cut
                     pthread_exit(NULL);
                 }
             }
             else { //right
-                if(pb->row == enemyList->e->row-1 && (pb->col <= enemyList->e->col && pb->col >= enemyList->e->col - enemyList->e->length)){
+                if(pb->row == enemyList->e->row+2 && (pb->col <= enemyList->e->col && pb->col >= enemyList->e->col - enemyList->e->length)){
                     enemyList->e->isHit = true;
                     enemyList->e->length = enemyList->e->col - pb->col;
                     spawnEnemy(enemyList->e->row, pb->col, enemyList->e->length-(enemyList->e->col - pb->col), pb->p, pb->mutex);
