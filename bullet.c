@@ -19,7 +19,7 @@ char* ENEMY_BULLET[BULLET_SIZE][BULLET_ANIM_TILES] =
    {"."}
 };
 
-/********************support functions***************
+/********************support functions***************/
 /* reset the player state to start */
 void newEnemyBullet(enemyBullet *eb) 
 {

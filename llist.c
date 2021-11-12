@@ -19,7 +19,7 @@ void spawnEnemy(int startRow, int startCol, int length, player *p, pthread_mutex
         e->startCol = startCol; // Initialize the enemy's startCol to the upper left of the console (78)
         e->startRow = startRow; // Initialize the enemy's startRow to the upper left of the console (2)
 
-        e->running = true;
+        e->isDead = false;
         e->isHit = false;
 
         e->direction = "left";
@@ -42,7 +42,7 @@ void spawnEnemy(int startRow, int startCol, int length, player *p, pthread_mutex
             insertEnemyQueue(e, enemyQueue);
         }
 
-        sleepTicks(10000); // TODO: should be a random interval
+        sleepTicks(rand() % (10000 + 1 - 8000) + 8000); // Generate a new enemy randomly between ticks 8000-10000
     }
 }
 

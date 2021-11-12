@@ -33,7 +33,7 @@ typedef struct enemy_struct
 	int startCol;
 	int startRow;
 
-	bool running;
+	bool isDead;
     bool isHit;
 
     int length;
