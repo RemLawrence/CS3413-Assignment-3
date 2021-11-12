@@ -151,6 +151,7 @@ void *runKeyboard(void* data) {
         wrappedMutexLock(&screenLock);
         putBanner("game over...Do, or do not.. there is no try!");
         wrappedMutexUnlock(&screenLock);
+        wrappedCondSignal(&cond_cv);
     }
 
     pthread_exit(NULL);
