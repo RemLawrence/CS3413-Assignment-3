@@ -89,32 +89,35 @@ void *runEnemy(void *data) {
     while(e->p->running && e->p->lives > 0) {
 
         if(e->length <= 4) {
-            e->p->score = e->p->score + 20;
             e->isDead = true;
             pthread_exit(NULL);
         }
 
-        char** tile_left = (char**)(malloc(sizeof(char)));
-        char** tile_right = (char**)(malloc(sizeof(char)));
-        if(e->length == ENEMY_WIDTH) {
-            // If the enemy has a width of exactly 80, then it hasen't been hit just yet.
-            tile_left = ENEMY_BODY_LEFT[i%ENEMY_BODY_ANIM_TILES];
-            tile_right = ENEMY_BODY_RIGHT[j%ENEMY_BODY_ANIM_TILES];
-            
-        }
-        else {
-            // The enemy is hit and needs to have the anim tiles cut off.
-            tile_left = ENEMY_BODY_LEFT[i%ENEMY_BODY_ANIM_TILES];
-            tile_right = ENEMY_BODY_RIGHT[j%ENEMY_BODY_ANIM_TILES];
-            //printf("%s\n", tile_left[0]);
-        }
+        char** tile_left = ENEMY_BODY_LEFT[i%ENEMY_BODY_ANIM_TILES];
+        char** tile_right = ENEMY_BODY_RIGHT[j%ENEMY_BODY_ANIM_TILES];
 
-        //probably not threadsafe here...
-        //start centipede at tile 2, 80, move it horizontally once a frame/tick
-        //we create the illusion of movement by clearing the screen where the centipede was last
-        //then drawing it in the new location. 
+        //printf("%s\n", tile_left);
         
         if(strcmp(e->direction, "right") == 0) {
+
+            if(e->length != ENEMY_WIDTH) {
+                // The enemy is hit and needs to have the anim tiles cut off.
+                int height_index, width_index;
+                for(height_index = 0; height_index < ENEMY_HEIGHT; height_index++) {
+                    char body_left[2][81];
+                    int z = 0;
+                    for (width_index = 80-e->length; width_index < 80; width_index++) {
+                        body_left[height_index][z] = tile_left[height_index][width_index];
+                        z++;
+                    }
+                    //printf("%s\n", body_left[0]);
+                    body_left[height_index][z+1] = '\0';
+                    tile_left[height_index] = body_left[height_index];
+                }
+                // tile_left = cutEnemyBody(ENEMY_BODY_LEFT[i%ENEMY_BODY_ANIM_TILES], e->length, "left");
+                // tile_right = cutEnemyBody(ENEMY_BODY_RIGHT[j%ENEMY_BODY_ANIM_TILES], e->length, "right");
+                //printf("%s\n", tile_left[0]);     
+            }
 
             wrappedMutexLock(e->mutex);
             // e->startRow is the previous row, -(e->col+j) is the previous centipede col location
@@ -133,7 +136,7 @@ void *runEnemy(void *data) {
             srand(time(NULL));   // Initialization, should only be called once.
             if(rand()%8 == 0) {
                 // Returns a pseudo-random integer between 0 and RAND_MAX.
-                spawnEnemyBullet(e->row+1, e->col, e->p, e->mutex);
+                //spawnEnemyBullet(e->row+1, e->col, e->p, e->mutex);
             }
 
             if(j >= COL_BOUNDARY) {
@@ -156,6 +159,23 @@ void *runEnemy(void *data) {
             
         }
         else {
+            if(e->length != ENEMY_WIDTH) {
+                // The enemy is hit and needs to have the anim tiles cut off.
+                int height_index, width_index;
+                for(height_index = 0; height_index < ENEMY_HEIGHT; height_index++) {
+                    char body_left[2][81];
+                    for (width_index = 0; width_index < e->length; width_index++) {
+                        body_left[height_index][width_index] = tile_left[height_index][width_index];
+                    }
+                    //printf("%s\n", body_left[0]);
+                    body_left[height_index][width_index+1] = '\0';
+                    tile_left[height_index] = body_left[height_index];
+                }
+            // tile_left = cutEnemyBody(ENEMY_BODY_LEFT[i%ENEMY_BODY_ANIM_TILES], e->length, "left");
+            // tile_right = cutEnemyBody(ENEMY_BODY_RIGHT[j%ENEMY_BODY_ANIM_TILES], e->length, "right");
+            //printf("%s\n", tile_left[0]);     
+            }
+
             if(e->row != ENEMY_FIRST_ROW) {
                 //If e-> row does not equal to 2, then the centipede is not on the first row
                 wrappedMutexLock(e->mutex);
@@ -177,7 +197,7 @@ void *runEnemy(void *data) {
             srand(time(NULL));   // Initialization, should only be called once.
             if(rand()%8 == 0) {
                 // Returns a pseudo-random integer between 0 and RAND_MAX.
-                spawnEnemyBullet(e->row+2, e->col, e->p, e->mutex);
+                //spawnEnemyBullet(e->row+2, e->col, e->p, e->mutex);
             }  
             
             if(e->col <= 0) {

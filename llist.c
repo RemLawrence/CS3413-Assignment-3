@@ -9,7 +9,7 @@ enemyNode* enemyQueue;
 bool bulletQInitialized = false;
 BulletNode *bulletQueue;
 
-void spawnEnemy(int startRow, int startCol, int length, player *p, pthread_mutex_t *screenLock)
+void spawnEnemy(int startRow, int startCol, int length, char* direction, player *p, pthread_mutex_t *screenLock)
 {
     bool first = true;
     
@@ -22,7 +22,7 @@ void spawnEnemy(int startRow, int startCol, int length, player *p, pthread_mutex
         e->isDead = false;
         e->isHit = false;
 
-        e->direction = "left";
+        e->direction = direction;
 
         e->length = length; // Length of the enemy body. Could be deducted when hit!
         e->speed = ENEMY_SPEED; // Initialize the enemy speed to 40

@@ -20,7 +20,7 @@ typedef struct nod
     struct nod *next;
 } BulletNode;
 
-void spawnEnemy(int startRow, int startCol, int length, player *p, pthread_mutex_t *screenLock);
+void spawnEnemy(int startRow, int startCol, int length, char* direction, player *p, pthread_mutex_t *screenLock);
 struct node* createEnemyQueue(enemy *e);
 void insertEnemyQueue(enemy *e, enemyNode *enemyQueue);
 enemyNode* getEnemyQueue();
