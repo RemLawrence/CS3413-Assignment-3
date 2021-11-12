@@ -67,6 +67,9 @@ pthread_t spawn_thread;
 pthread_t upkeep_thread;
 pthread_mutex_t upkeep_mutex;
 
+pthread_mutex_t cond_mutex;
+pthread_cond_t  cond_cv;
+
 //the rest will hold the main game engine
 //it's likely you'll add quite a bit to it (input, cleanup, synchronization, etc)
 
@@ -133,6 +136,7 @@ void *runKeyboard(void* data) {
                         spawnPlayerBullet(p->row-1, p->col+2, p, &screenLock);
                         break;
                 case KEY_Q_PREESSED:
+                        wrappedCondSignal(&cond_cv);
                         wrappedMutexLock(&screenLock);
                         putBanner("quitter....");
                         wrappedMutexUnlock(&screenLock);
@@ -195,14 +199,21 @@ void centipedeRun()
 
                 //note after this the player thread keeps running and isn't cleaned
                 //up properly. Why don't we see it update on screen?
-                while(p->running && p->lives > 0) {
-                }
+                pthread_cond_init(&cond_cv, NULL);
+                wrappedMutexInit(&cond_mutex, NULL); // Initialize screenLock
+                wrappedMutexLock(&cond_mutex);
+                wrappedCondWait(&cond_cv, &cond_mutex);
+                wrappedMutexUnlock(&cond_mutex);
                 finalKeypress(); /* wait for final key before killing curses and game */
                 p->running = false;
+
                 pthread_join(p->thread, NULL);
                 pthread_join(keyboard_thread, NULL);
                 pthread_join(refresh_thread, NULL);
                 pthread_join(spawn_thread, NULL);
+
+                pthread_mutex_destroy(&cond_mutex);
+                pthread_cond_destroy(&cond_cv);
 
                 free(p);
         }

@@ -89,6 +89,7 @@ void *runEnemy(void *data) {
     while(e->p->running && e->p->lives > 0) {
 
         if(e->length <= 4) {
+            e->p->score = e->p->score + 20;
             e->isDead = true;
             pthread_exit(NULL);
         }
@@ -103,8 +104,8 @@ void *runEnemy(void *data) {
         }
         else {
             // The enemy is hit and needs to have the anim tiles cut off.
-            tile_right = cutEnemyBody(ENEMY_BODY_RIGHT[j%ENEMY_BODY_ANIM_TILES], e->length, "right");
-            tile_left = cutEnemyBody(ENEMY_BODY_LEFT[i%ENEMY_BODY_ANIM_TILES], e->length, "left");
+            tile_left = ENEMY_BODY_LEFT[i%ENEMY_BODY_ANIM_TILES];
+            tile_right = ENEMY_BODY_RIGHT[j%ENEMY_BODY_ANIM_TILES];
             //printf("%s\n", tile_left[0]);
         }
 
