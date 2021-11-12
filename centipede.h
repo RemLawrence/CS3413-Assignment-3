@@ -25,5 +25,6 @@ void *runSpawnThread(void *data);
 
 void centipedeRun();
 
+void cleanUp(player *p);
 
 #endif

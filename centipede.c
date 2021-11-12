@@ -136,10 +136,10 @@ void *runKeyboard(void* data) {
                         spawnPlayerBullet(p->row-1, p->col+2, p, &screenLock);
                         break;
                 case KEY_Q_PREESSED:
-                        wrappedCondSignal(&cond_cv);
                         wrappedMutexLock(&screenLock);
                         putBanner("quitter....");
                         wrappedMutexUnlock(&screenLock);
+                        wrappedCondSignal(&cond_cv);
                         break;
                 default:
                         break;
@@ -147,9 +147,11 @@ void *runKeyboard(void* data) {
                 playerMove(p, prevRow, prevCol);
         }
     }
-    wrappedMutexLock(&screenLock);
-    putBanner("game over...Do, or do not.. there is no try!");
-    wrappedMutexUnlock(&screenLock);
+    if(p->lives == 0) {
+        wrappedMutexLock(&screenLock);
+        putBanner("game over...Do, or do not.. there is no try!");
+        wrappedMutexUnlock(&screenLock);
+    }
 
     pthread_exit(NULL);
 }
@@ -204,19 +206,55 @@ void centipedeRun()
                 wrappedMutexLock(&cond_mutex);
                 wrappedCondWait(&cond_cv, &cond_mutex);
                 wrappedMutexUnlock(&cond_mutex);
+
+                cleanUp(p);
                 finalKeypress(); /* wait for final key before killing curses and game */
-                p->running = false;
 
-                pthread_join(p->thread, NULL);
-                pthread_join(keyboard_thread, NULL);
-                pthread_join(refresh_thread, NULL);
-                pthread_join(spawn_thread, NULL);
-
-                pthread_mutex_destroy(&cond_mutex);
-                pthread_cond_destroy(&cond_cv);
-
-                free(p);
         }
         consoleFinish();
+}
+
+void cleanUp(player *p) {
+        p->running = false;
+        pthread_cancel(p->thread);
+        pthread_join(p->thread, NULL); // Join the only player thread
+        pthread_cancel(keyboard_thread);
+        pthread_join(keyboard_thread, NULL); // Join the only keyboard thread
+        pthread_cancel(refresh_thread);
+        pthread_join(refresh_thread, NULL); // Join the only refresh thread
+        pthread_cancel(upkeep_thread);
+        pthread_join(upkeep_thread, NULL); // Join the only upkeep thread
+        pthread_cancel(spawn_thread);
+        pthread_join(spawn_thread, NULL); // Join the only spawn thread
+
+        enemyNode *enemyList = getEnemyQueue();
+        while(enemyList != NULL) {
+                pthread_cancel(enemyList->e->thread);
+                pthread_join(enemyList->e->thread, NULL);
+                free(enemyList->e);
+                enemyList = enemyList -> next;
+        }
+
+        BulletNode *bulletList = getBulletQueue();
+        while(bulletList != NULL) {
+                if(bulletList->eb != NULL) {
+                        pthread_cancel(bulletList->eb->thread);
+                        pthread_join(bulletList->eb->thread, NULL);
+                        free(bulletList->eb);
+                }
+                else if(bulletList->pb != NULL) {
+                        pthread_cancel(bulletList->pb->thread);
+                        pthread_join(bulletList->pb->thread, NULL);
+                        free(bulletList->pb);
+                }
+                bulletList = bulletList -> next;
+        }
+
+        pthread_mutex_destroy(&cond_mutex);
+        pthread_cond_destroy(&cond_cv);
+
+        free(enemyList);
+        free(bulletList);
+        free(p);
 }
 
