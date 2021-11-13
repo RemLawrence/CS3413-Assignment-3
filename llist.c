@@ -8,7 +8,7 @@
 enemyNode* enemyQueue;
 
 BulletNode *bulletQueue;
-pthread_mutex_t bulletListLock;
+//pthread_mutex_t bulletListLock;
 
 void spawnEnemy(int startRow, int startCol, int length, char* direction, player *p, pthread_mutex_t *screenLock)
 {
@@ -71,7 +71,7 @@ enemyNode* getEnemyQueue() {
 
 void spawnEnemyBullet(int startRow, int startCol, player *p, pthread_mutex_t *screenLock)
 {
-    wrappedMutexInit(&bulletListLock, NULL); // Initialize bulletListLock
+    //wrappedMutexInit(&bulletListLock, NULL); // Initialize bulletListLock
     enemyBullet* eb = (enemyBullet*)(malloc(sizeof(enemyBullet)));
 	eb->startCol = startCol;
 	eb->startRow = startRow;
@@ -80,14 +80,14 @@ void spawnEnemyBullet(int startRow, int startCol, player *p, pthread_mutex_t *sc
     eb->p = p;
 
     if (bulletQueue == NULL) {
-        wrappedMutexLock(&bulletListLock);
+        //wrappedMutexLock(&bulletListLock);
         bulletQueue = createBulletQueue(NULL, eb);
-        wrappedMutexUnlock(&bulletListLock);
+        //wrappedMutexUnlock(&bulletListLock);
     }
     else {
-        wrappedMutexLock(&bulletListLock);
+        //wrappedMutexLock(&bulletListLock);
         insertBulletQueue(NULL, eb, bulletQueue);
-        wrappedMutexUnlock(&bulletListLock);
+        //wrappedMutexUnlock(&bulletListLock);
     }
 
 	//TODO: Init mutex...
@@ -97,7 +97,7 @@ void spawnEnemyBullet(int startRow, int startCol, player *p, pthread_mutex_t *sc
 
 void spawnPlayerBullet(int startRow, int startCol, player *p, pthread_mutex_t *screenLock)
 {
-    wrappedMutexInit(&bulletListLock, NULL); // Initialize bulletListLock
+    //wrappedMutexInit(&bulletListLock, NULL); // Initialize bulletListLock
     playerBullet* pb = (playerBullet*)(malloc(sizeof(playerBullet)));
 	pb->startCol = startCol;
 	pb->startRow = startRow;
@@ -106,14 +106,14 @@ void spawnPlayerBullet(int startRow, int startCol, player *p, pthread_mutex_t *s
     pb->p = p;
 
     if (bulletQueue == NULL) {
-        wrappedMutexLock(&bulletListLock);
+        //wrappedMutexLock(&bulletListLock);
         bulletQueue = createBulletQueue(pb, NULL);
-        wrappedMutexUnlock(&bulletListLock);
+        //wrappedMutexUnlock(&bulletListLock);
     }
     else {
-        wrappedMutexLock(&bulletListLock);
+        //wrappedMutexLock(&bulletListLock);
         insertBulletQueue(pb, NULL, bulletQueue);
-        wrappedMutexUnlock(&bulletListLock);
+        //wrappedMutexUnlock(&bulletListLock);
     }
 
 	//TODO: Init mutex...

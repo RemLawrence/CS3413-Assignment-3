@@ -1,0 +1,29 @@
+{
+    "files.associations": {
+        "keyboard.h": "c",
+        "stdio.h": "c",
+        "threadwrappers.h": "c",
+        "centipede.h": "c",
+        "pthread.h": "c",
+        "stdbool.h": "c",
+        "select.h": "c",
+        "time.h": "c",
+        "string.h": "c",
+        "llist.h": "c",
+        "gameglobals.h": "c",
+        "ratio": "c",
+        "__hash_table": "c",
+        "__node_handle": "c",
+        "console.h": "c",
+        "__locale": "c",
+        "__string": "c",
+        "string": "c",
+        "string_view": "c",
+        "__mutex_base": "c",
+        "array": "c",
+        "iterator": "c",
+        "vector": "c",
+        "__threading_support": "c"
+    },
+    "C_Cpp.errorSquiggles": "Disabled"
+}
