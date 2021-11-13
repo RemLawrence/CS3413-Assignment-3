@@ -92,42 +92,48 @@ void *runEnemy(void *data) {
             e->isDead = true;
             pthread_exit(NULL);
         }
+        
+// char** tile_left = (char**)malloc(10000*sizeof(char));
+        // char** tile_right = (char**)malloc(10000*sizeof(char));
 
         char** tile_left = ENEMY_BODY_LEFT[i%ENEMY_BODY_ANIM_TILES];
         char** tile_right = ENEMY_BODY_RIGHT[j%ENEMY_BODY_ANIM_TILES];
 
-        //printf("%s\n", tile_left);
+        //printf("%s\n", tile_right[0]);
         
         if(strcmp(e->direction, "right") == 0) {
 
             if(e->length != ENEMY_WIDTH) {
                 // The enemy is hit and needs to have the anim tiles cut off.
-                // int height_index, width_index;
-                // for(height_index = 0; height_index < ENEMY_HEIGHT; height_index++) {
-                //     char body_right[2][81];
-                //     int z = 0;
-                //     for (width_index = 80-e->length; width_index < 80; width_index++) {
-                //         body_right[height_index][z] = tile_right[height_index][width_index];
-                //         z++;
-                //     }
-                //     //printf("%s\n", body_left[0]);
-                //     body_right[height_index][z+1] = '\0';
-                //     tile_right[height_index] = body_right[height_index];
-                // }
+                int height_index = 0;
+                int width_index = 0;
+                for(height_index = 0; height_index < ENEMY_HEIGHT; height_index++) {
+                    char body_right[2][81];
+                    int z = 0;
+                    for (width_index = 0; width_index < e->length; width_index++) {
+                        body_right[height_index][z] = tile_left[height_index][width_index];
+                        z++;
+                        //printf("%c\n", tile_right[height_index][width_index]);
+                    }
+                    //printf("%s\n", tile_right[0]);
+                    //body_right[height_index][z+1] = '\0';
+                    tile_right[height_index] = body_right[height_index];
+                }
                 // tile_left = cutEnemyBody(ENEMY_BODY_LEFT[i%ENEMY_BODY_ANIM_TILES], e->length, "left");
                 // tile_right = cutEnemyBody(ENEMY_BODY_RIGHT[j%ENEMY_BODY_ANIM_TILES], e->length, "right");
                 //printf("%s\n", tile_left[0]);     
             }
-
+            //printf("%s\n", tile_right[1]);
             wrappedMutexLock(e->mutex);
             // e->startRow is the previous row, -(e->col+j) is the previous centipede col location
-            consoleClearImage(e->startRow, -j, ENEMY_HEIGHT, e->length); 
+            consoleClearImage(e->startRow, -j, ENEMY_HEIGHT, e->length);
             // e->startRow is the previous row, -(e->col+j+2) is the previous centipede col location - 2
             // to make the marker think it's still running on the previous row, KEKW
 		    consoleDrawImage(e->startRow, -(j+2), tile_left, ENEMY_HEIGHT);
             wrappedMutexUnlock(e->mutex);
 
             wrappedMutexLock(e->mutex);
+            //printf("%d\n", -(e->length)+j);
             consoleClearImage(e->row, -(e->length)+j, ENEMY_HEIGHT, e->length); // Clear
             consoleDrawImage(e->row, -(e->length)+j+1, tile_right, ENEMY_HEIGHT); // Draw
             wrappedMutexUnlock(e->mutex);
@@ -136,7 +142,7 @@ void *runEnemy(void *data) {
             srand(time(NULL));   // Initialization, should only be called once.
             if(rand()%8 == 0) {
                 // Returns a pseudo-random integer between 0 and RAND_MAX.
-                spawnEnemyBullet(e->row+1, e->col, e->p, e->mutex);
+                //spawnEnemyBullet(e->row+1, e->col, e->p, e->mutex);
             }
 
             if(j >= COL_BOUNDARY) {
@@ -197,7 +203,7 @@ void *runEnemy(void *data) {
             srand(time(NULL));   // Initialization, should only be called once.
             if(rand()%8 == 0) {
                 // Returns a pseudo-random integer between 0 and RAND_MAX.
-                spawnEnemyBullet(e->row+2, e->col, e->p, e->mutex);
+                //spawnEnemyBullet(e->row+2, e->col, e->p, e->mutex);
             }  
             
             if(e->col <= 0) {
@@ -230,7 +236,7 @@ void *runEnemy(void *data) {
         }
         // free(tile_left);
         // free(tile_right);
-		sleepTicks(e->speed);
+		sleepTicks(4);
 	}
     // free(tile_left);
     // free(tile_right);
