@@ -120,14 +120,14 @@ void *runEnemy(void *data) {
             
             wrappedMutexLock(e->mutex);
             // e->startRow is the previous row, -(e->col+j) is the previous centipede col location
-            consoleClearImage(e->startRow, -j, ENEMY_HEIGHT, e->length);
+            consoleClearImage(e->startRow, -j+1, ENEMY_HEIGHT, e->length);
             // e->startRow is the previous row, -(e->col+j+2) is the previous centipede col location - 2
             // to make the marker think it's still running on the previous row, KEKW
 		    consoleDrawImage(e->startRow, -(j+2), tile_left, ENEMY_HEIGHT);
             wrappedMutexUnlock(e->mutex);
 
             wrappedMutexLock(e->mutex);
-            consoleClearImage(e->row, -(e->length)+j, ENEMY_HEIGHT, e->length); // Clear
+            consoleClearImage(e->row, -(e->length)+j-1, ENEMY_HEIGHT, e->length); // Clear
             consoleDrawImage(e->row, -(e->length)+j+1, tile_right, ENEMY_HEIGHT); // Draw
             wrappedMutexUnlock(e->mutex);
             e->col = j; // Update e->col's position
@@ -165,7 +165,7 @@ void *runEnemy(void *data) {
                 wrappedMutexLock(e->mutex);
                 // e->row-2 is the previous row, e->startCol-i is the previous centipede col location
                 //printf("e->startRow %d\n", e->startRow);
-                consoleClearImage(e->startRow, COL_BOUNDARY-e->length+i, ENEMY_HEIGHT, e->length); 
+                consoleClearImage(e->startRow, COL_BOUNDARY-e->length+i-1, ENEMY_HEIGHT, e->length); 
                 // e->row-2 is the previous row, e->startCol-i-2 is the previous centipede col location - 2
                 // to make the marker think it's still running on the previous row, KEKW
                 consoleDrawImage(e->startRow, COL_BOUNDARY-e->length+i+2, tile_right, ENEMY_HEIGHT);
@@ -173,7 +173,7 @@ void *runEnemy(void *data) {
             }
 
             wrappedMutexLock(e->mutex);
-            consoleClearImage(e->row, e->col, ENEMY_HEIGHT, e->length); // e->startCol-i is the current centipede location
+            consoleClearImage(e->row, e->col+1, ENEMY_HEIGHT, e->length); // e->startCol-i is the current centipede location
             e->col = e->startCol-i-2; // Update e->col's position
 		    consoleDrawImage(e->row, e->col, tile_left, ENEMY_HEIGHT);
             wrappedMutexUnlock(e->mutex);
