@@ -4,6 +4,7 @@
 #include <string.h>
 #include "enemy.h"
 #include "bullet.h"
+#include "threadwrappers.h"
 
 // A Linked List
 typedef struct node

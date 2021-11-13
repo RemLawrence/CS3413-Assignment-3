@@ -30,6 +30,7 @@ typedef struct playerBullet_struct
     
 	pthread_t thread;
 	pthread_mutex_t *mutex; //pointer to screenLock
+	pthread_mutex_t *llist; //pointer to Lined List
 } playerBullet;
 
 typedef struct enemyBullet_struct 
@@ -49,6 +50,7 @@ typedef struct enemyBullet_struct
     
 	pthread_t thread;
 	pthread_mutex_t *mutex; //pointer to screenLock
+	pthread_mutex_t *llist; //pointer to Lined List
 } enemyBullet;
 
 void newEnemyBullet(enemyBullet *eb);

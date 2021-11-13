@@ -217,6 +217,7 @@ void centipedeRun()
 
 void cleanUp(player *p) {
         p->running = false;
+        
         pthread_cancel(p->thread);
         pthread_join(p->thread, NULL); // Join the only player thread
         pthread_cancel(keyboard_thread);
@@ -253,6 +254,8 @@ void cleanUp(player *p) {
 
         pthread_mutex_destroy(&cond_mutex);
         pthread_cond_destroy(&cond_cv);
+
+        pthread_mutex_destroy(&screenLock);
 
         free(enemyList);
         free(bulletList);

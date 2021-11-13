@@ -67,19 +67,27 @@ enemyNode* getEnemyQueue() {
 }
 
 
+
+
 void spawnEnemyBullet(int startRow, int startCol, player *p, pthread_mutex_t *screenLock)
 {
+    wrappedMutexInit(&bulletListLock, NULL); // Initialize bulletListLock
     enemyBullet* eb = (enemyBullet*)(malloc(sizeof(enemyBullet)));
 	eb->startCol = startCol;
 	eb->startRow = startRow;
 	eb->mutex = screenLock;
+    eb->llist = &bulletListLock;
     eb->p = p;
 
     if (bulletQueue == NULL) {
+        wrappedMutexLock(&bulletListLock);
         bulletQueue = createBulletQueue(NULL, eb);
+        wrappedMutexUnlock(&bulletListLock);
     }
     else {
+        wrappedMutexLock(&bulletListLock);
         insertBulletQueue(NULL, eb, bulletQueue);
+        wrappedMutexUnlock(&bulletListLock);
     }
 
 	//TODO: Init mutex...
@@ -89,17 +97,23 @@ void spawnEnemyBullet(int startRow, int startCol, player *p, pthread_mutex_t *sc
 
 void spawnPlayerBullet(int startRow, int startCol, player *p, pthread_mutex_t *screenLock)
 {
+    wrappedMutexInit(&bulletListLock, NULL); // Initialize bulletListLock
     playerBullet* pb = (playerBullet*)(malloc(sizeof(playerBullet)));
 	pb->startCol = startCol;
 	pb->startRow = startRow;
 	pb->mutex = screenLock;
+    pb->llist = &bulletListLock;
     pb->p = p;
 
     if (bulletQueue == NULL) {
+        wrappedMutexLock(&bulletListLock);
         bulletQueue = createBulletQueue(pb, NULL);
+        wrappedMutexUnlock(&bulletListLock);
     }
     else {
+        wrappedMutexLock(&bulletListLock);
         insertBulletQueue(pb, NULL, bulletQueue);
+        wrappedMutexUnlock(&bulletListLock);
     }
 
 	//TODO: Init mutex...
