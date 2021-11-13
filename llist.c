@@ -10,7 +10,7 @@ enemyNode* enemyQueue;
 BulletNode *bulletQueue;
 pthread_mutex_t bulletListLock;
 bool first = true;
-pthread_mutex_t enemyLock;
+pthread_mutex_t enemyListLock;
 
 void spawnEnemy(int startRow, int startCol, int length, char* direction, bool spawn, player *p, pthread_mutex_t *screenLock)
 {   
@@ -31,9 +31,8 @@ void spawnEnemy(int startRow, int startCol, int length, char* direction, bool sp
         e->p = p; // A reference to the player
 
         //TODO: Init mutex...
+        wrappedMutexInit(&enemyListLock, NULL);
         wrappedMutexInit(e->mutex, NULL);
-        e->enemyLock = &enemyLock;
-        wrappedMutexInit(e->enemyLock, NULL);
         wrappedPthreadCreate(&(e->thread), NULL, runEnemy, (void*)e);
 
         if(first) {
@@ -46,8 +45,7 @@ void spawnEnemy(int startRow, int startCol, int length, char* direction, bool sp
 
         /* If this method is called by the spawn thread, it has the responsibility to spawn new enemy with length=80 */
         if(spawn) {
-            sleepTicks(10000);
-            //sleepTicks(rand() % (10000 + 1 - 8000) + 8000); // Generate a new enemy randomly between ticks 8000-10000
+            sleepTicks(rand() % (10000 + 1 - 8000) + 8000); // Generate a new enemy randomly between ticks 8000-10000
         }
         else {
             /* If this method is not called by the spawn thread, it just spawns one enemy */
@@ -58,17 +56,23 @@ void spawnEnemy(int startRow, int startCol, int length, char* direction, bool sp
 
 enemyNode* createEnemyQueue(enemy *e) {
     enemyNode *newEnemyQueue = (enemyNode*)malloc(sizeof(enemyNode));
+    wrappedMutexLock(&enemyListLock);
     newEnemyQueue->e = e;
     newEnemyQueue->next = NULL;
+    wrappedMutexUnlock(&enemyListLock);
     return newEnemyQueue; // node created and return it
 }
 
 void insertEnemyQueue(enemy *e, enemyNode *enemyQueue) {
     enemyNode *newEnemyQueue = createEnemyQueue(e);
     while(enemyQueue->next != NULL) {
+        wrappedMutexLock(&enemyListLock);
         enemyQueue = enemyQueue -> next;
+        wrappedMutexUnlock(&enemyListLock);
     }
+    wrappedMutexLock(&enemyListLock);
     enemyQueue->next = newEnemyQueue;
+    wrappedMutexUnlock(&enemyListLock);
 }
 
 enemyNode* getEnemyQueue() {
