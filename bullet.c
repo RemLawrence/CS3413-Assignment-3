@@ -51,6 +51,7 @@ void *runEnemyBullet(void *data) {
             // Enemy bullet didn't hit player, it's about to go out of the lower boundary
             eb->isDead = true;
             wrappedMutexUnlock(eb->mutex);
+            deleteBullet(NULL, eb);
             break;
         }
         else {
@@ -66,6 +67,7 @@ void *runEnemyBullet(void *data) {
             consoleClearImage(eb->row, eb->col, BULLET_SIZE, BULLET_SIZE); // Clear bullet when it hits the player
             wrappedMutexUnlock(eb->mutex);
             eb->isDead = true;
+            deleteBullet(NULL, eb);
             break;
         }
 
@@ -92,6 +94,7 @@ void *runPlayerBullet(void *data) {
                     //spawnEnemy(enemyList->e->row, pb->col, enemyList->e->length-(pb->col - enemyList->e->col), enemyList->e->direction, pb->p, pb->mutex); // Spawn a new enemy on the pb cut
                     enemyList->e->length = pb->col - enemyList->e->col; // Update previous enemy's length
                     pb->isDead = true;
+                    deleteBullet(pb, NULL);
                     pthread_exit(NULL);
                 }
             }
@@ -102,6 +105,8 @@ void *runPlayerBullet(void *data) {
                     spawnEnemy(enemyList->e->row, pb->col, enemyList->e->length-(enemyList->e->col - pb->col), enemyList->e->direction, pb->p, pb->mutex);
                     enemyList->e->length = enemyList->e->col - pb->col; // Update previous enemy's length
                     pb->isDead = true;
+                    deleteBullet(pb, NULL);
+                    
                     pthread_exit(NULL);
                 }
             }
@@ -114,6 +119,7 @@ void *runPlayerBullet(void *data) {
             // If the bullet get passed enemy and is out of the boundary
             pb->isDead = true;
             wrappedMutexUnlock(pb->mutex);
+            deleteBullet(pb, NULL);
             break;
         }
         else {

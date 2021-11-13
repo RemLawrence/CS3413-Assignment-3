@@ -8,6 +8,7 @@
 enemyNode* enemyQueue;
 
 BulletNode *bulletQueue;
+pthread_mutex_t bulletListLock;
 
 void spawnEnemy(int startRow, int startCol, int length, char* direction, player *p, pthread_mutex_t *screenLock)
 {
@@ -136,7 +137,7 @@ void deleteBullet(playerBullet *pb, enemyBullet *eb) {
             pthread_cancel(pb->thread);
             pthread_join(pb->thread, NULL);
             free(pb);
-            printf("really?1");
+            //printf("really?1");
         }
         else {
             // the bullet we wanna delete it not the head
@@ -154,7 +155,7 @@ void deleteBullet(playerBullet *pb, enemyBullet *eb) {
                     break;
                 }
             }
-            printf("really?2");
+            //printf("really?2");
         }
     }
     else if(eb != NULL) {
@@ -170,7 +171,7 @@ void deleteBullet(playerBullet *pb, enemyBullet *eb) {
             pthread_cancel(eb->thread);
             pthread_join(eb->thread, NULL);
             free(eb);
-            printf("really?3");
+            //printf("really?3");
         }
         else {
             // the bullet we wanna delete it not the head
@@ -185,7 +186,7 @@ void deleteBullet(playerBullet *pb, enemyBullet *eb) {
                     pthread_cancel(eb->thread);
                     pthread_join(eb->thread, NULL);
                     free(eb);
-                    printf("really?4");
+                    //printf("really?4");
                     break;
                 }
             }

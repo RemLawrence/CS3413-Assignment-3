@@ -17,21 +17,6 @@ void *runUpkeep(void *data) {
         putString(lives, UPKEEP_ROW, LIVES_POS, BUF_SIZE);
         wrappedMutexUnlock(p->mutex);
 
-        // Clean up for bullets
-        BulletNode *bulletList = getBulletQueue();
-        while(bulletList != NULL) {
-                if(bulletList->eb != NULL) {
-                    if(bulletList->eb->isDead) {
-                        deleteBullet(NULL, bulletList->eb);
-                    }
-                }
-                else if(bulletList->pb != NULL) {
-                    if(bulletList->pb->isDead) {
-                        deleteBullet(bulletList->pb, NULL);
-                    }
-                }
-                bulletList = bulletList -> next;
-        }
     }
     pthread_exit(NULL);
 }
