@@ -113,6 +113,29 @@ void *runEnemy(void *data) {
         }
         
         if(strcmp(e->direction, "right") == 0) {
+            if(e->length != ENEMY_WIDTH) {
+                // The enemy is hit and needs to have the anim tiles cut off.
+                int height_index = 0;
+                int width_index = 0;
+                for(height_index = 0; height_index < ENEMY_HEIGHT; height_index++) {
+                    char body_right[2][81];
+                    int z = 0;
+                    for (width_index = 0; width_index < e->length; width_index++) {
+                        // char subBuff[e->length+1];
+                        // memcpy(subBuff, &tile_right[height_index][80-e->length], e->length);
+                        // subBuff[e->length] = '\0';
+                        body_right[height_index][z] = tile_left[height_index][width_index];
+                        z++;
+                    }
+                    // Reverse the string to make it turn right
+                    strrev(body_right[height_index]);
+                    
+
+                    body_right[height_index][z+1] = '\0'; // Add NULL terminator to the end of the string
+                    tile_right[height_index] = body_right[height_index]; // Assign tile_right the body value
+                    //printf("%s\n", tile_right[height_index]);
+                }
+            }
             wrappedMutexLock(e->mutex);
             // e->startRow is the previous row, -(e->col+j) is the previous centipede col location
             consoleClearImage(e->startRow, -j, ENEMY_HEIGHT, e->length);
