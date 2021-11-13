@@ -75,6 +75,40 @@ void insertEnemyQueue(enemy *e, enemyNode *enemyQueue) {
     wrappedMutexUnlock(&enemyListLock);
 }
 
+void deleteEnemy(enemy *e) {
+    if(enemyQueue->e->thread == e->thread) {
+        if(enemyQueue->next == NULL) {
+            wrappedMutexLock(&enemyListLock);
+            enemyQueue = NULL;
+            wrappedMutexUnlock(&enemyListLock);
+        }
+        else {
+            wrappedMutexLock(&enemyListLock);
+            enemyQueue = enemyQueue->next;
+            wrappedMutexUnlock(&enemyListLock);
+        }
+        wrappedMutexLock(&enemyListLock);
+        pthread_cancel(e->thread);
+        pthread_join(e->thread, NULL);
+        free(e);
+        wrappedMutexUnlock(&enemyListLock);
+    }
+    else {
+        while(enemyQueue->next != NULL) {
+            if(enemyQueue->next->e->thread == e->thread) {
+                wrappedMutexLock(&enemyListLock);
+                enemyQueue->next = enemyQueue->next->next;
+
+                pthread_cancel(e->thread);
+                pthread_join(e->thread, NULL);
+                free(e);
+                wrappedMutexUnlock(&enemyListLock);
+                break;
+            }
+        }
+    }
+}
+
 enemyNode* getEnemyQueue() {
     return enemyQueue;
 }

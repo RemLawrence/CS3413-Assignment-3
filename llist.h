@@ -24,6 +24,7 @@ typedef struct nod
 void spawnEnemy(int startRow, int startCol, int length, char* direction, bool spawn, player *p, pthread_mutex_t *screenLock);
 struct node* createEnemyQueue(enemy *e);
 void insertEnemyQueue(enemy *e, enemyNode *enemyQueue);
+void deleteEnemy(enemy *e);
 enemyNode* getEnemyQueue();
 
 void spawnEnemyBullet(int startRow, int startCol, player *p, pthread_mutex_t *screenLock);

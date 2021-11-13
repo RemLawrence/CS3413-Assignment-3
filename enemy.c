@@ -70,6 +70,7 @@ void *runEnemy(void *data) {
         /* If the enemy's length < 5, then it will die and thread will exit */
         if(e->length <= 4) {
             e->isDead = true;
+            deleteEnemy(e);
             pthread_exit(NULL);
         }
 
