@@ -66,7 +66,7 @@ void playerMove(player *f, int dRow, int dCol) {
 
 /********************THREAD functions***************/
 
-player* spawnPlayer(int startRow, int startCol, int lives, pthread_mutex_t *screenLock)
+player* spawnPlayer(int startRow, int startCol, int lives, pthread_mutex_t *screenLock, pthread_cond_t *cond_cv)
 {
     player* p = (player*)(malloc(sizeof(player)));
 	p->lives = lives;
@@ -75,8 +75,8 @@ player* spawnPlayer(int startRow, int startCol, int lives, pthread_mutex_t *scre
 	p->startRow = startRow;
 	p->running = true;
 	p->mutex = screenLock;
+	p->cond_cv = cond_cv;
 
-	//TODO: Init mutex...
 	wrappedMutexInit(p->mutex, NULL);
 	wrappedPthreadCreate(&(p->thread), NULL, runPlayerT, (void*)p);
 	return p;
@@ -99,6 +99,11 @@ void *runPlayerT(void *data)
 				p->lives--;
 				//wrappedMutexUnlock(p->mutex);
 				//TODO: Freeze screen
+			case GAMEOVER:
+				wrappedMutexLock(p->mutex);
+				putBanner("You win!!!");
+				wrappedMutexUnlock(p->mutex);
+				wrappedCondSignal(p->cond_cv);
 			default:
 				;
 		}

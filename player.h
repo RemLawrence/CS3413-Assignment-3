@@ -51,11 +51,12 @@ typedef struct player_struct
 	int animTile;
 	pthread_t thread;
 	pthread_mutex_t *mutex; //pointer to screenLock
+	pthread_cond_t  *cond_cv;
 } player;
 
 void *runPlayerT(void *data);
 
-player* spawnPlayer(int startRow, int startCol, int lives, pthread_mutex_t *screenLock);
+player* spawnPlayer(int startRow, int startCol, int lives, pthread_mutex_t *screenLock, pthread_cond_t *cond_cv);
 
 /* thread safe for player & ALSO LOCKS SCREEN */
 //yours may or may not lock the screen on call.

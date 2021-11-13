@@ -9,13 +9,12 @@ enemyNode* enemyQueue;
 
 BulletNode *bulletQueue;
 pthread_mutex_t bulletListLock;
+bool first = true;
 
 void spawnEnemy(int startRow, int startCol, int length, char* direction, player *p, pthread_mutex_t *screenLock)
-{
-    bool first = true;
-    
+{   
     while(p->running && p->lives > 0) {
-        enemy* e = (enemy*)(malloc(100*sizeof(enemy)));
+        enemy* e = (enemy*)(malloc(sizeof(enemy)));
 
         e->startCol = startCol; // Initialize the enemy's startCol to the upper left of the console (78)
         e->startRow = startRow; // Initialize the enemy's startRow to the upper left of the console (2)

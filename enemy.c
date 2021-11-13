@@ -40,46 +40,22 @@ void newEnemy(enemy *e)
 	e->animTile = 0;
 }
 
-char** cutEnemyBody(char** enemyBody, int length, char* direction) {
-    char newEnemyBody[ENEMY_HEIGHT+1][length+2];
-    char** body_left = (char**)(malloc(sizeof(char)));
-    char** body_right = (char**)(malloc(sizeof(char)));
-
-    if(strcmp(direction, "left") == 0) {
-        int i = 0;
-        int j = 0;
-        for (i = 0; i < ENEMY_HEIGHT; i++) {
-            for (j = 0; j < length; j++) {
-                newEnemyBody[i][j] = enemyBody[i][j]; // char level assign
-            }
-            newEnemyBody[i][j+1] = '\0';
-            body_left[i] = newEnemyBody[i];
-        }
-        body_left[2] = "\0";
-        return body_left;
-    }
-    else {
-        int i = ENEMY_HEIGHT-1;
-        int j = length-1;
-        for (i = ENEMY_HEIGHT-1; i >= 0; i--) {
-            newEnemyBody[i][j+1] = '\0';
-            int z = ENEMY_WIDTH-1;
-            for (j = length-1; j >= 0; j--) {
-                newEnemyBody[i][j] = enemyBody[i][z]; // char level assign
-                z--;
-            }
-            body_right[i] = newEnemyBody[i];
-        }  
-        body_right[2] = "\0";
-        return body_right; 
+/* reverse a string 
+    e.g. hello -> olleh */
+void strrev(char *str) {
+    char *p1, *p2;
+    for (p1=str, p2=str+strlen(str)-1; p2>p1; ++p1, --p2){
+        *p1 ^= *p2;
+        *p2 ^= *p1;
+        *p1 ^= *p2;
     }
 }
 
-/********************THREAD functions***************/
+/********************THREAD function***************/
 void *runEnemy(void *data) {
     // Pass the reference to the player p
 	enemy* e = (enemy*)data;
-
+    wrappedMutexInit(&e->enemyLock, NULL);
 	/* RESET the player state to start */
 	newEnemy(e);
 
@@ -87,22 +63,20 @@ void *runEnemy(void *data) {
     int j = 0; // aka. rightIncrementor
 
     while(e->p->running && e->p->lives > 0) {
-
+        //wrappedMutexLock(&e->enemyLock);
+        /* If the enemy's length < 5, then it will die and thread will exit */
         if(e->length <= 4) {
             e->isDead = true;
             pthread_exit(NULL);
         }
-        
-// char** tile_left = (char**)malloc(10000*sizeof(char));
-        // char** tile_right = (char**)malloc(10000*sizeof(char));
 
+        //printf("%s\n", ENEMY_BODY_LEFT[i%ENEMY_BODY_ANIM_TILES][0]);
         char** tile_left = ENEMY_BODY_LEFT[i%ENEMY_BODY_ANIM_TILES];
         char** tile_right = ENEMY_BODY_RIGHT[j%ENEMY_BODY_ANIM_TILES];
 
-        //printf("%s\n", tile_right[0]);
+        //memcpy(tile_left[0], ENEMY_BODY_LEFT[i%ENEMY_BODY_ANIM_TILES][0], sizeof(tile_left));
         
         if(strcmp(e->direction, "right") == 0) {
-
             if(e->length != ENEMY_WIDTH) {
                 // The enemy is hit and needs to have the anim tiles cut off.
                 int height_index = 0;
@@ -113,17 +87,16 @@ void *runEnemy(void *data) {
                     for (width_index = 0; width_index < e->length; width_index++) {
                         body_right[height_index][z] = tile_left[height_index][width_index];
                         z++;
-                        //printf("%c\n", tile_right[height_index][width_index]);
                     }
-                    //printf("%s\n", tile_right[0]);
-                    //body_right[height_index][z+1] = '\0';
-                    tile_right[height_index] = body_right[height_index];
-                }
-                // tile_left = cutEnemyBody(ENEMY_BODY_LEFT[i%ENEMY_BODY_ANIM_TILES], e->length, "left");
-                // tile_right = cutEnemyBody(ENEMY_BODY_RIGHT[j%ENEMY_BODY_ANIM_TILES], e->length, "right");
-                //printf("%s\n", tile_left[0]);     
+                    // Reverse the string to make it turn right
+                    strrev(body_right[height_index]);
+
+                    body_right[height_index][z+1] = '\0'; // Add NULL terminator to the end of the string
+                    tile_right[height_index] = body_right[height_index]; // Assign tile_right the body value
+                } 
+                
             }
-            //printf("%s\n", tile_right[1]);
+            //printf("%s\n", ENEMY_BODY_LEFT[j%ENEMY_BODY_ANIM_TILES][0]);
             wrappedMutexLock(e->mutex);
             // e->startRow is the previous row, -(e->col+j) is the previous centipede col location
             consoleClearImage(e->startRow, -j, ENEMY_HEIGHT, e->length);
@@ -165,8 +138,8 @@ void *runEnemy(void *data) {
             
         }
         else {
+            /* The enemy is hit and needs to have the anim tiles cut off. */
             if(e->length != ENEMY_WIDTH) {
-                // The enemy is hit and needs to have the anim tiles cut off.
                 int height_index, width_index;
                 for(height_index = 0; height_index < ENEMY_HEIGHT; height_index++) {
                     char body_left[2][81];
@@ -174,12 +147,9 @@ void *runEnemy(void *data) {
                         body_left[height_index][width_index] = tile_left[height_index][width_index];
                     }
                     //printf("%s\n", body_left[0]);
-                    body_left[height_index][width_index+1] = '\0';
-                    tile_left[height_index] = body_left[height_index];
+                    body_left[height_index][width_index+1] = '\0'; // Add NULL terminator to the end of the string
+                    tile_left[height_index] = body_left[height_index]; // Assign tile_left the body value
                 }
-            // tile_left = cutEnemyBody(ENEMY_BODY_LEFT[i%ENEMY_BODY_ANIM_TILES], e->length, "left");
-            // tile_right = cutEnemyBody(ENEMY_BODY_RIGHT[j%ENEMY_BODY_ANIM_TILES], e->length, "right");
-            //printf("%s\n", tile_left[0]);     
             }
 
             if(e->row != ENEMY_FIRST_ROW) {
@@ -236,6 +206,7 @@ void *runEnemy(void *data) {
         }
         // free(tile_left);
         // free(tile_right);
+        //wrappedMutexUnlock(&e->enemyLock);
 		sleepTicks(4);
 	}
     // free(tile_left);

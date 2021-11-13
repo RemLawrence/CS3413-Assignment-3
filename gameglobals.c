@@ -17,6 +17,11 @@ void *runUpkeep(void *data) {
         putString(lives, UPKEEP_ROW, LIVES_POS, BUF_SIZE);
         wrappedMutexUnlock(p->mutex);
 
+        /* Regularly check if there is no enemy left */
+        enemyNode *enemyList = getEnemyQueue();
+        if(enemyList == NULL) {
+            p->state = GAMEOVER;
+        }
     }
     pthread_exit(NULL);
 }

@@ -181,7 +181,7 @@ void centipedeRun()
                 wrappedMutexInit(&screenLock, NULL); // Initialize screenLock
 
                 //initialize player on the screen. startRow=20, startColumn=36, lives=4
-                player *p = spawnPlayer(20, 36, 4, &screenLock);
+                player *p = spawnPlayer(20, 36, 4, &screenLock, &cond_cv);
 
                 //initialize the spawn thread on the screen. startRow=0, startColumn=80
                 wrappedPthreadCreate(&(spawn_thread), NULL, runSpawnThread, (void*)p);
@@ -217,7 +217,7 @@ void centipedeRun()
 
 void cleanUp(player *p) {
         p->running = false;
-        
+
         pthread_cancel(p->thread);
         pthread_join(p->thread, NULL); // Join the only player thread
         pthread_cancel(keyboard_thread);
