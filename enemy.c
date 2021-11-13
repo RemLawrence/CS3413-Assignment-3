@@ -113,7 +113,7 @@ void *runEnemy(void *data) {
                 //     //printf("%s\n", body_left[0]);
                 //     body_right[height_index][z+1] = '\0';
                 //     tile_right[height_index] = body_right[height_index];
-                }
+                // }
                 // tile_left = cutEnemyBody(ENEMY_BODY_LEFT[i%ENEMY_BODY_ANIM_TILES], e->length, "left");
                 // tile_right = cutEnemyBody(ENEMY_BODY_RIGHT[j%ENEMY_BODY_ANIM_TILES], e->length, "right");
                 //printf("%s\n", tile_left[0]);     
