@@ -7,29 +7,7 @@
 #include <time.h>
 #include <stdlib.h>
 
-char* ENEMY_BODY_LEFT[ENEMY_BODY_ANIM_TILES][ENEMY_HEIGHT] = 
-{
-   {"@|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||",
-   "=;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,"},
-  {"@||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^",
-   "=;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;"},
-  {"@|^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|",
-   "=,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;"},
-  {"-^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^||",
-   "=;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;"}
-};
 
-char* ENEMY_BODY_RIGHT[ENEMY_BODY_ANIM_TILES][ENEMY_HEIGHT] = 
-{
-  {"|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||@",
-   ";;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,="},
-   {"^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^||-",
-   ";;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;="},
-   {"|^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|@",
-   ",;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;="},
-   {"||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^@",
-   ";,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;="}
-};
 
 /********************support functions****************/
 /* reset the enemy state to start */
@@ -53,22 +31,47 @@ void strrev(char *str) {
 
 /********************THREAD function***************/
 void *runEnemy(void *data) {
+
+    char* ENEMY_BODY_LEFT[ENEMY_BODY_ANIM_TILES][ENEMY_HEIGHT] = 
+    {
+        {"@|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||",
+        "=;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,"},
+        {"@||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^",
+        "=;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;"},
+        {"@|^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|",
+        "=,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;"},
+        {"-^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^||",
+        "=;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;"}
+    };
+
+    char* ENEMY_BODY_RIGHT[ENEMY_BODY_ANIM_TILES][ENEMY_HEIGHT] = 
+    {
+        {"|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||@",
+        ";;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,="},
+        {"^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^||-",
+        ";;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;="},
+        {"|^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|@",
+        ",;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;="},
+        {"||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^@",
+        ";,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;;;,;="}
+    };
     // Pass the reference to the player p
 	enemy* e = (enemy*)data;
-    wrappedMutexInit(&e->enemyLock, NULL);
+    //wrappedMutexInit(&e->enemyLock, NULL);
 	/* RESET the player state to start */
 	newEnemy(e);
-
 	int i = 0; // aka. leftIncrementor
     int j = 0; // aka. rightIncrementor
 
     while(e->p->running && e->p->lives > 0) {
+        //printf("%d\n", e->col);
         //wrappedMutexLock(&e->enemyLock);
         /* If the enemy's length < 5, then it will die and thread will exit */
         if(e->length <= 4) {
             e->isDead = true;
             pthread_exit(NULL);
         }
+        //printf("%d\n", e->length);
 
         //printf("%s\n", ENEMY_BODY_LEFT[i%ENEMY_BODY_ANIM_TILES][0]);
         char** tile_left = ENEMY_BODY_LEFT[i%ENEMY_BODY_ANIM_TILES];
@@ -106,7 +109,6 @@ void *runEnemy(void *data) {
             wrappedMutexUnlock(e->mutex);
 
             wrappedMutexLock(e->mutex);
-            //printf("%d\n", -(e->length)+j);
             consoleClearImage(e->row, -(e->length)+j, ENEMY_HEIGHT, e->length); // Clear
             consoleDrawImage(e->row, -(e->length)+j+1, tile_right, ENEMY_HEIGHT); // Draw
             wrappedMutexUnlock(e->mutex);
@@ -146,7 +148,6 @@ void *runEnemy(void *data) {
                     for (width_index = 0; width_index < e->length; width_index++) {
                         body_left[height_index][width_index] = tile_left[height_index][width_index];
                     }
-                    //printf("%s\n", body_left[0]);
                     body_left[height_index][width_index+1] = '\0'; // Add NULL terminator to the end of the string
                     tile_left[height_index] = body_left[height_index]; // Assign tile_left the body value
                 }
@@ -166,7 +167,7 @@ void *runEnemy(void *data) {
 
             wrappedMutexLock(e->mutex);
             consoleClearImage(e->row, e->col, ENEMY_HEIGHT, e->length); // e->startCol-i is the current centipede location
-            e->col = COL_BOUNDARY-i-2; // Update e->col's position
+            e->col = e->startCol-i-2; // Update e->col's position
 		    consoleDrawImage(e->row, e->col, tile_left, ENEMY_HEIGHT);
             wrappedMutexUnlock(e->mutex);
 
@@ -195,21 +196,18 @@ void *runEnemy(void *data) {
         }
 
         if(e->isHit) {
-            // Catch the isHit signal from player bullet thread, consume it by increasing the speed of this enemy.
-            if(e->speed == ENEMY_SPEED/2){
-
+            /* Catch the isHit signal from player bullet thread, consume it by increasing the speed of this enemy. */
+            if(e->speed == ENEMY_SPEED/2) {
+                /* Maximum speed: 40/2 */
             }
             else {
                 e->speed = e->speed/2;
             }
-            e->isHit = false;
+            e->isHit = false; // Turn off the hit flag
         }
-        // free(tile_left);
-        // free(tile_right);
         //wrappedMutexUnlock(&e->enemyLock);
-		sleepTicks(4);
+		sleepTicks(e->speed);
 	}
-    // free(tile_left);
-    // free(tile_right);
+
     pthread_exit(NULL);	
 }

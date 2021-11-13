@@ -10,12 +10,12 @@ enemyNode* enemyQueue;
 BulletNode *bulletQueue;
 pthread_mutex_t bulletListLock;
 bool first = true;
+pthread_mutex_t enemyLock;
 
-void spawnEnemy(int startRow, int startCol, int length, char* direction, player *p, pthread_mutex_t *screenLock)
+void spawnEnemy(int startRow, int startCol, int length, char* direction, bool spawn, player *p, pthread_mutex_t *screenLock)
 {   
     while(p->running && p->lives > 0) {
         enemy* e = (enemy*)(malloc(sizeof(enemy)));
-
         e->startCol = startCol; // Initialize the enemy's startCol to the upper left of the console (78)
         e->startRow = startRow; // Initialize the enemy's startRow to the upper left of the console (2)
 
@@ -32,6 +32,8 @@ void spawnEnemy(int startRow, int startCol, int length, char* direction, player 
 
         //TODO: Init mutex...
         wrappedMutexInit(e->mutex, NULL);
+        e->enemyLock = &enemyLock;
+        wrappedMutexInit(e->enemyLock, NULL);
         wrappedPthreadCreate(&(e->thread), NULL, runEnemy, (void*)e);
 
         if(first) {
@@ -42,7 +44,15 @@ void spawnEnemy(int startRow, int startCol, int length, char* direction, player 
             insertEnemyQueue(e, enemyQueue);
         }
 
-        sleepTicks(rand() % (10000 + 1 - 8000) + 8000); // Generate a new enemy randomly between ticks 8000-10000
+        /* If this method is called by the spawn thread, it has the responsibility to spawn new enemy with length=80 */
+        if(spawn) {
+            sleepTicks(10000);
+            //sleepTicks(rand() % (10000 + 1 - 8000) + 8000); // Generate a new enemy randomly between ticks 8000-10000
+        }
+        else {
+            /* If this method is not called by the spawn thread, it just spawns one enemy */
+            break;
+        }
     }
 }
 

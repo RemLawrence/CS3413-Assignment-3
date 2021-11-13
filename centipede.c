@@ -169,7 +169,7 @@ void *runConsoleRefresh(void *data) {
 
 void *runSpawnThread(void *data) {
         player* p = (player*)data;
-        spawnEnemy(2, 80, ENEMY_WIDTH, "left", p, &screenLock);
+        spawnEnemy(2, 80, ENEMY_WIDTH, "left", true, p, &screenLock);
         pthread_exit(NULL);
 }
 

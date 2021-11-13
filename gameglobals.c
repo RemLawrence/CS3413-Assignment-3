@@ -18,9 +18,10 @@ void *runUpkeep(void *data) {
         wrappedMutexUnlock(p->mutex);
 
         /* Regularly check if there is no enemy left */
+        sleepTicks(3);
         enemyNode *enemyList = getEnemyQueue();
         if(enemyList == NULL) {
-            p->state = GAMEOVER;
+            p->state = GAMEOVER; // Let the player win
         }
     }
     pthread_exit(NULL);

@@ -41,7 +41,7 @@ typedef struct enemy_struct
     
 	pthread_t thread;
 	pthread_mutex_t *mutex; //pointer to screenLock
-    pthread_mutex_t enemyLock;
+    pthread_mutex_t *enemyLock;
 } enemy;
 
 void newEnemy(enemy *e);

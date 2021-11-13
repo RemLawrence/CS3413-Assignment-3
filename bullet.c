@@ -95,12 +95,10 @@ void *runPlayerBullet(void *data) {
                 if(pb->row == enemyList->e->row+2 && (pb->col >= enemyList->e->col && pb->col <= enemyList->e->col + enemyList->e->length)){
                     pb->p->score = pb->p->score + 20; // Centipede's been hit, update player's score.
                     int length = enemyList->e->length;
-                    
-                    spawnEnemy(enemyList->e->row, pb->col+10, length-(pb->col - enemyList->e->col), enemyList->e->direction, pb->p, pb->mutex); // Spawn a new enemy on the pb cut
-                    
                     enemyList->e->length = pb->col - enemyList->e->col; // Update previous enemy's length
-                    pb->isDead = true;
                     enemyList->e->isHit = true;
+                    spawnEnemy(enemyList->e->row, pb->col+3, length-(pb->col - enemyList->e->col), enemyList->e->direction, false, pb->p, pb->mutex); // Spawn a new enemy on the pb cut
+                    pb->isDead = true;
 
                     //wrappedMutexLock(pb->llist);
                     deleteBullet(pb, NULL);
@@ -112,7 +110,7 @@ void *runPlayerBullet(void *data) {
                 if(pb->row == enemyList->e->row+2 && (pb->col <= enemyList->e->col && pb->col >= enemyList->e->col - enemyList->e->length)){
                     pb->p->score = pb->p->score + 20; // Centipede's been hit, update player's score.
                     enemyList->e->isHit = true;
-                    //spawnEnemy(enemyList->e->row, pb->col, enemyList->e->length-(enemyList->e->col - pb->col), enemyList->e->direction, pb->p, pb->mutex);
+                    spawnEnemy(enemyList->e->row, pb->col+3, enemyList->e->length-(enemyList->e->col - pb->col), enemyList->e->direction, false, pb->p, pb->mutex);
                     enemyList->e->length = enemyList->e->col - pb->col; // Update previous enemy's length
                     pb->isDead = true;
                     //wrappedMutexLock(pb->llist);
