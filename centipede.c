@@ -153,7 +153,6 @@ void *runKeyboard(void* data) {
         wrappedMutexUnlock(&screenLock);
         wrappedCondSignal(&cond_cv);
     }
-
     pthread_exit(NULL);
 }
 
