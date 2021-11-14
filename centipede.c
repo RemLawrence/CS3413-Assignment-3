@@ -100,7 +100,7 @@ void *runKeyboard(void* data) {
         }
         else {
             if(p->state == DEAD) {
-                sleep(2);
+                sleep(1);
             }
             /* FD_ISSET(0, &rfds) is true so input is available now. */
             char input;
@@ -172,7 +172,7 @@ void *runConsoleRefresh(void *data) {
 
 void *runSpawnThread(void *data) {
         player* p = (player*)data;
-        spawnEnemy(2, 80, ENEMY_WIDTH, "left", true, p, &screenLock);
+        spawnEnemy(ENEMY_HEIGHT, ENEMY_WIDTH, ENEMY_WIDTH, "left", true, p, &screenLock);
         pthread_exit(NULL);
 }
 

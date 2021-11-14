@@ -17,6 +17,9 @@
 #define KEY_Q_PREESSED 'q'
 #define PLAYER_BOUNDARY_ROW 17
 
+#define ENEMY_HEIGHT 2
+#define ENEMY_WIDTH 80
+
 void *runKeyboard(void *data);
 
 void *runConsoleRefresh(void *data);
