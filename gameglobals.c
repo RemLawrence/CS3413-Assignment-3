@@ -21,12 +21,17 @@ void *runUpkeep(void *data) {
         /* Regularly check if there is no enemy left */
         sleepTicks(1);
         enemyNode *enemyList = getEnemyQueue();
-        if(enemyList == NULL) {
-            p->state = GAMEOVER; // Let the player win
+        bool gameover = true;
+        while(enemyList != NULL){
+            if(!enemyList->e->isDead) {
+                gameover = false;
+                break;
+            }
+            enemyList = enemyList-> next;
         }
 
+        /* When the player is shot, remove all the bullets on the screen. */
         if(p->state == DEAD) {
-            
             BulletNode *bulletList = getBulletQueue();
             while(bulletList != NULL) {
                 if(bulletList->eb != NULL) {

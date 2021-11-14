@@ -50,7 +50,7 @@ void *runEnemyBullet(void *data) {
             eb->isDead = true;
             wrappedMutexUnlock(eb->mutex);
             //wrappedMutexLock(eb->llist);
-            //deleteBullet(NULL, eb);
+            deleteBullet(NULL, eb);
             //wrappedMutexUnlock(eb->llist);
             break;
         }
@@ -68,7 +68,7 @@ void *runEnemyBullet(void *data) {
             wrappedMutexUnlock(eb->mutex);
             eb->isDead = true;
             //wrappedMutexLock(eb->llist);
-            //deleteBullet(NULL, eb);
+            deleteBullet(NULL, eb);
             //wrappedMutexUnlock(eb->llist);
             break;
         }
@@ -99,7 +99,7 @@ void *runPlayerBullet(void *data) {
                     pb->isDead = true;
 
                     //wrappedMutexLock(pb->llist);
-                    //deleteBullet(pb, NULL);
+                    deleteBullet(pb, NULL);
                     //wrappedMutexUnlock(pb->llist);
                     pthread_exit(NULL);
                 }
@@ -112,7 +112,7 @@ void *runPlayerBullet(void *data) {
                     enemyList->e->length = enemyList->e->col - pb->col; // Update previous enemy's length
                     pb->isDead = true;
                     //wrappedMutexLock(pb->llist);
-                    //deleteBullet(pb, NULL);
+                    deleteBullet(pb, NULL);
                     //wrappedMutexUnlock(pb->llist);
                     
                     pthread_exit(NULL);
@@ -128,7 +128,7 @@ void *runPlayerBullet(void *data) {
             pb->isDead = true;
             wrappedMutexUnlock(pb->mutex);
             //wrappedMutexLock(pb->llist);
-            //deleteBullet(pb, NULL);
+            deleteBullet(pb, NULL);
             //wrappedMutexUnlock(pb->llist);
             break;
         }
