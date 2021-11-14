@@ -77,11 +77,32 @@ void *runEnemy(void *data) {
             deleteEnemy(e);
             pthread_exit(NULL);
         }
-
-        char** tile_left = ENEMY_BODY_LEFT[e->animTile];
-        char** tile_right = ENEMY_BODY_RIGHT[e->animTile];
-        char tempArray[2][e->length+1];
-
+        
+        // char** tile_left = ENEMY_BODY_LEFT[e->animTile];
+        // char** tile_right = ENEMY_BODY_RIGHT[e->animTile];
+        // char tempArray[2][e->length+1];
+        
+        char* tile_left[e->length+1];
+        char left_0[e->length+1];
+        char left_1[e->length+1];
+        strcpy(left_1, ENEMY_BODY_LEFT[e->animTile][1]);
+        strcpy(left_0, ENEMY_BODY_LEFT[e->animTile][0]);
+        left_0[e->length] = '\0';
+        
+        tile_left[0] = left_0;
+        tile_left[1] = left_1;
+        
+        
+        char* tile_right[e->length+1];
+        char right_0[e->length+1];
+        char right_1[e->length+1];
+        strcpy(right_0, ENEMY_BODY_RIGHT[e->animTile][0]);
+        strcpy(right_1, ENEMY_BODY_RIGHT[e->animTile][1]);
+        
+        right_0[e->length] = '\0';
+        tile_right[0] = right_0;
+        tile_right[1] = right_1;
+        //char tempArray[2][e->length+1];
         if(e->length != ENEMY_WIDTH) {
             // The enemy is hit and needs to have the anim tiles cut off.
             int height_index = 0;
@@ -89,29 +110,32 @@ void *runEnemy(void *data) {
             for(height_index = 0; height_index < ENEMY_HEIGHT; height_index++) {
                 char body_right[2][81];
                 int z = 0;
-                for (width_index = 0; width_index < e->length; width_index++) {
-                    body_right[height_index][z] = tile_left[height_index][width_index];
+                for (width_index = 80-e->length; width_index < 80; width_index++) {
+                    body_right[height_index][z] = tile_right[height_index][width_index];
                     z++;
                 }
                 body_right[height_index][z+1] = '\0'; // Add NULL terminator to the end of the string
                 
-                strcpy(tempArray[height_index], body_right[height_index]);
+                //strcpy(tempArray[height_index], body_right[height_index]);
                 
                 // Reverse the string to make it turn right
-                strrev(tempArray[height_index]);
+                //strrev(tempArray[height_index]);
                 
-                tile_right[height_index] = tempArray[height_index]; // Assign tile_right the body value
+                tile_right[height_index] = body_right[height_index]; // Assign tile_right the body value
                 
                 //printf("%s\n", tile_right[height_index]);
             }
 
             height_index = 0;
             width_index = 0;
+            
             for(height_index = 0; height_index < ENEMY_HEIGHT; height_index++) {
                 char body_left[2][81];
                 for (width_index = 0; width_index < e->length; width_index++) {
                     body_left[height_index][width_index] = tile_left[height_index][width_index];
+                    // printf("%c\n", body_left[height_index][width_index]);
                 }
+                
                 body_left[height_index][width_index+1] = '\0'; // Add NULL terminator to the end of the string
                 tile_left[height_index] = body_left[height_index]; // Assign tile_left the body value
             }
