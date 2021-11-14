@@ -99,6 +99,9 @@ void *runKeyboard(void* data) {
             exit(EXIT_FAILURE);
         }
         else {
+            if(p->state == DEAD) {
+                sleep(2);
+            }
             /* FD_ISSET(0, &rfds) is true so input is available now. */
             char input;
             input = getchar(); // TODO: NO, THIS IS NOT PERFECT, GAME STILL WAITING FOR THIS 

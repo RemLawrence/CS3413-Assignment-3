@@ -6,6 +6,7 @@
 #include <pthread.h>
 #include <time.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 
 
@@ -41,6 +42,9 @@ void *runEnemy(void *data) {
     int j = 0; // aka. rightIncrementor
 
     while(e->p->running && e->p->lives > 0) {
+        if(e->p->state == DEAD) {
+            sleep(2);
+        }
         char* ENEMY_BODY_LEFT[ENEMY_BODY_ANIM_TILES][ENEMY_HEIGHT] = 
         {
             {"@|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||^|||",
@@ -86,9 +90,6 @@ void *runEnemy(void *data) {
                 char body_right[2][81];
                 int z = 0;
                 for (width_index = 0; width_index < e->length; width_index++) {
-                    // char subBuff[e->length+1];
-                    // memcpy(subBuff, &tile_right[height_index][80-e->length], e->length);
-                    // subBuff[e->length] = '\0';
                     body_right[height_index][z] = tile_left[height_index][width_index];
                     z++;
                 }
@@ -134,7 +135,7 @@ void *runEnemy(void *data) {
             e->col = j; // Update e->col's position
 
             srand(time(NULL));   // Initialization, should only be called once.
-            if(rand()%50 == 0) {
+            if(rand()%10 == 0) {
                 // Returns a pseudo-random integer between 0 and RAND_MAX.
                 spawnEnemyBullet(e->row+1, e->col, e->p, e->mutex);
             }
@@ -180,7 +181,7 @@ void *runEnemy(void *data) {
             wrappedMutexUnlock(e->mutex);
 
             srand(time(NULL));   // Initialization, should only be called once.
-            if(rand()%50 == 0) {
+            if(rand()%10 == 0) {
                 // Returns a pseudo-random integer between 0 and RAND_MAX.
                 spawnEnemyBullet(e->row+2, e->col, e->p, e->mutex);
             }  

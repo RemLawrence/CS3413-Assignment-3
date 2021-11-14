@@ -42,7 +42,11 @@ void *runEnemyBullet(void *data) {
     enemyBullet* eb = (enemyBullet*)data;
     newEnemyBullet(eb);
     while(eb->p->running && eb->p->lives > 0) {
-        // and not being consumed...
+
+        if(eb->p->state == DEAD) {
+            consoleClearImage(eb->row, eb->col, BULLET_SIZE, BULLET_SIZE);
+        }
+
         char** enemy_bullet_tile = ENEMY_BULLET[BULLET_ANIM_TILES-1];
 
         wrappedMutexLock(eb->mutex);
@@ -52,7 +56,7 @@ void *runEnemyBullet(void *data) {
             eb->isDead = true;
             wrappedMutexUnlock(eb->mutex);
             //wrappedMutexLock(eb->llist);
-            deleteBullet(NULL, eb);
+            //deleteBullet(NULL, eb);
             //wrappedMutexUnlock(eb->llist);
             break;
         }
@@ -62,7 +66,7 @@ void *runEnemyBullet(void *data) {
         consoleDrawImage(eb->row, eb->col, enemy_bullet_tile, BULLET_SIZE); // Draw
         wrappedMutexUnlock(eb->mutex);
 
-        if(eb->row == eb->p->row && (eb->col == eb->p->col || eb->col == eb->p->col+1 || eb->col == eb->p->col+2 || eb->col == eb->p->col+3 || eb->col == eb->p->col+4)) {
+        if(eb->row == eb->p->row-1 && (eb->col == eb->p->col || eb->col == eb->p->col+1 || eb->col == eb->p->col+2 || eb->col == eb->p->col+3 || eb->col == eb->p->col+4)) {
             // The player got hit by the bullet
             killPlayer(eb->p);
             wrappedMutexLock(eb->mutex);
@@ -70,7 +74,7 @@ void *runEnemyBullet(void *data) {
             wrappedMutexUnlock(eb->mutex);
             eb->isDead = true;
             //wrappedMutexLock(eb->llist);
-            deleteBullet(NULL, eb);
+            //deleteBullet(NULL, eb);
             //wrappedMutexUnlock(eb->llist);
             break;
         }
@@ -86,7 +90,10 @@ void *runPlayerBullet(void *data) {
     newPlayerBullet(pb);
     pb->p->score = pb->p->score + 1;
     while(pb->p->running && pb->p->lives > 0) {
-        // and not being consumed...
+        if(pb->p->state == DEAD) {
+            consoleClearImage(pb->row, pb->col, BULLET_SIZE, BULLET_SIZE);
+        }
+
         char** player_bullet_tile = PLAYER_BULLET[BULLET_ANIM_TILES-1];
 
         enemyNode *enemyList = getEnemyQueue();
@@ -101,7 +108,7 @@ void *runPlayerBullet(void *data) {
                     pb->isDead = true;
 
                     //wrappedMutexLock(pb->llist);
-                    deleteBullet(pb, NULL);
+                    //deleteBullet(pb, NULL);
                     //wrappedMutexUnlock(pb->llist);
                     pthread_exit(NULL);
                 }
@@ -114,7 +121,7 @@ void *runPlayerBullet(void *data) {
                     enemyList->e->length = enemyList->e->col - pb->col; // Update previous enemy's length
                     pb->isDead = true;
                     //wrappedMutexLock(pb->llist);
-                    deleteBullet(pb, NULL);
+                    //deleteBullet(pb, NULL);
                     //wrappedMutexUnlock(pb->llist);
                     
                     pthread_exit(NULL);
@@ -130,7 +137,7 @@ void *runPlayerBullet(void *data) {
             pb->isDead = true;
             wrappedMutexUnlock(pb->mutex);
             //wrappedMutexLock(pb->llist);
-            deleteBullet(pb, NULL);
+            //deleteBullet(pb, NULL);
             //wrappedMutexUnlock(pb->llist);
             break;
         }

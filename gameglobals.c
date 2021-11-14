@@ -1,5 +1,6 @@
 #include "gameglobals.h"
 #include <stdio.h>
+#include <unistd.h>
 
 void *runUpkeep(void *data) {
     player* p = (player*)data;
@@ -22,6 +23,29 @@ void *runUpkeep(void *data) {
         enemyNode *enemyList = getEnemyQueue();
         if(enemyList == NULL) {
             p->state = GAMEOVER; // Let the player win
+        }
+
+        if(p->state == DEAD) {
+            
+            BulletNode *bulletList = getBulletQueue();
+            while(bulletList != NULL) {
+                if(bulletList->eb != NULL) {
+                    wrappedMutexLock(p->mutex);
+                    consoleClearImage(bulletList->eb->row, bulletList->eb->col, BULLET_SIZE, BULLET_SIZE);
+                    wrappedMutexUnlock(p->mutex);
+                    pthread_cancel(bulletList->eb->thread);
+                    pthread_join(bulletList->eb->thread, NULL);
+                }
+                else if(bulletList->pb != NULL) {
+                    wrappedMutexLock(p->mutex);
+                    consoleClearImage(bulletList->pb->row, bulletList->pb->col, BULLET_SIZE, BULLET_SIZE);
+                    wrappedMutexUnlock(p->mutex);
+                    pthread_cancel(bulletList->pb->thread);
+                    pthread_join(bulletList->pb->thread, NULL);
+                }
+                bulletList = bulletList -> next;
+            }
+            
         }
     }
     pthread_exit(NULL);

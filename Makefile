@@ -35,7 +35,7 @@ llist.o: llist.c llist.h enemy.h console.h threadwrappers.h
 bullet.o: bullet.c bullet.h llist.h player.h enemy.h console.h threadwrappers.h
 	$(CC) $(CFLAGS) -c bullet.c
 
-upkeep.o: gameglobals.c gameglobals.h bullet.h llist.h player.h enemy.h console.h threadwrappers.h
+upkeep.o: gameglobals.c gameglobals.h bullet.h centipede.h llist.h player.h enemy.h console.h threadwrappers.h
 	$(CC) $(CFLAGS) -c gameglobals.c
 
 console.o: console.c console.h

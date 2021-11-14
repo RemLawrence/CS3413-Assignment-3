@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <curses.h>
 #include <pthread.h>
+#include <unistd.h>
 
 //sample player graphic, 3 tile animation.
 //feel free to use this or make your own
@@ -97,9 +98,27 @@ void *runPlayerT(void *data)
 			case DEAD:
 				//wrappedMutexLock(p->mutex);
 				p->lives--;
-				//wrappedMutexUnlock(p->mutex);
-				//TODO: Freeze screen
+				/* Freeze the screen */
+				sleep(2);
+				wrappedMutexLock(p->mutex);
+				consoleClearImage(p->row, p->col, PLAYER_HEIGHT, PLAYER_WIDTH); /* Clears the hit position */
+				wrappedMutexUnlock(p->mutex);
+				p->row = p->startRow;
+				p->col = p->startCol;
+				wrappedMutexLock(p->mutex);
+				consoleDrawImage(p->row, p->col, playerGraphic[p->animTile], PLAYER_HEIGHT); /* Respawns to the original pos */
+				wrappedMutexUnlock(p->mutex);
+				
+				if(p->lives > 0) {
+					/* Respawns to the original pos, if player's lives > 0 */
+					p->state = GAME; 
+				}
+				else {
+					/* player loses. The signal is sent via keyboard thread. No need to do anything here. */
+				}
+				break;
 			case GAMEOVER:
+				/* No enemy left. player wins */
 				wrappedMutexLock(p->mutex);
 				putBanner("You win!!!");
 				wrappedMutexUnlock(p->mutex);
@@ -122,7 +141,7 @@ void *runPlayerT(void *data)
 }
 
 void killPlayer(player* p) {
-	p->lives--;
+	p->state = DEAD;
 	// Instead of p->lives--, change player state to DEAD and call a freeze screen method?
 	// TODO: and freeze screen
 }
