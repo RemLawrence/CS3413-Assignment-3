@@ -117,13 +117,16 @@ void *runEnemy(void *data) {
         if(strcmp(e->direction, "right") == 0) {
             
             if(e->startRow == e->row) {
-                // wrappedMutexLock(e->mutex);
-                // // e->startRow is the previous row, -(e->col+j) is the previous centipede col location
-                // consoleClearImage(e->startRow-1, -j+1, ENEMY_HEIGHT, e->length);
-                // // e->startRow is the previous row, -(e->col+j+2) is the previous centipede col location - 2
-                // // to make the marker think it's still running on the previous row, KEKW
-                // consoleDrawImage(e->startRow-1, -(j+2), tile_left, ENEMY_HEIGHT);
-                // wrappedMutexUnlock(e->mutex);
+                /* This means this centipede is being cut, so startRow is not meant as a prevRow. It's its new row. */
+                /* Hence, we should not handle the turning body on the previous row anymore */
+
+                wrappedMutexLock(e->mutex);
+                // e->startRow is the previous row, -(e->col+j) is the previous centipede col location
+                consoleClearImage(e->startRow-2, -e->col-1, ENEMY_HEIGHT, e->length);
+                // e->startRow is the previous row, -(e->col+j+2) is the previous centipede col location - 2
+                // to make the marker think it's still running on the previous row, KEKW
+                consoleDrawImage(e->startRow-2, -(e->col+3), tile_left, ENEMY_HEIGHT);
+                wrappedMutexUnlock(e->mutex);
             }
             else {
                 wrappedMutexLock(e->mutex);
@@ -135,9 +138,8 @@ void *runEnemy(void *data) {
                 wrappedMutexUnlock(e->mutex);
             }
             
-
-            
             if(e->startCol != 0) {
+                /* being cut */
                 e->col = e->startCol+j;
                 wrappedMutexLock(e->mutex);
                 consoleClearImage(e->row, -(e->length)+e->col-1, ENEMY_HEIGHT, e->length); // Clear
@@ -180,17 +182,19 @@ void *runEnemy(void *data) {
             
         }
         else {
-            /* The enemy is hit and needs to have the anim tiles cut off. */
             if(e->row != ENEMY_FIRST_ROW) {
                 if(e->startRow == e->row) {
-                    // //If e-> row does not equal to 2, then the centipede is not on the first row
-                    // wrappedMutexLock(e->mutex);
-                    // // e->row-2 is the previous row, e->startCol-i is the previous centipede col location
-                    // consoleClearImage(e->startRow, COL_BOUNDARY-e->length+i-1, ENEMY_HEIGHT, e->length); 
-                    // // e->row-2 is the previous row, e->startCol-i-2 is the previous centipede col location - 2
-                    // // to make the marker think it's still running on the previous row, KEKW
-                    // consoleDrawImage(e->startRow, COL_BOUNDARY-e->length+i+2, tile_right, ENEMY_HEIGHT);
-                    // wrappedMutexUnlock(e->mutex);
+                    /* This means this centipede is being cut, so startRow is not meant as a prevRow. It's its new row. */
+                    /* Hence, we should not handle the turning body on the previous row anymore */
+
+                    //If e-> row does not equal to 2, then the centipede is not on the first row
+                    wrappedMutexLock(e->mutex);
+                    // e->row-2 is the previous row, e->startCol-i is the previous centipede col location
+                    consoleClearImage(e->startRow-2, COL_BOUNDARY-e->length+i-1, ENEMY_HEIGHT, e->length); 
+                    // e->row-2 is the previous row, e->startCol-i-2 is the previous centipede col location - 2
+                    // to make the marker think it's still running on the previous row, KEKW
+                    consoleDrawImage(e->startRow-2, COL_BOUNDARY-e->length+i+2, tile_right, ENEMY_HEIGHT);
+                    wrappedMutexUnlock(e->mutex);
                 }
                 else {
                     //If e-> row does not equal to 2, then the centipede is not on the first row
@@ -202,7 +206,6 @@ void *runEnemy(void *data) {
                     consoleDrawImage(e->startRow, COL_BOUNDARY-e->length+i+2, tile_right, ENEMY_HEIGHT);
                     wrappedMutexUnlock(e->mutex);
                 }
-                
             }
 
             wrappedMutexLock(e->mutex);
