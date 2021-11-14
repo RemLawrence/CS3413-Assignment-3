@@ -56,53 +56,53 @@ void spawnEnemy(int startRow, int startCol, int length, char* direction, bool sp
 
 enemyNode* createEnemyQueue(enemy *e) {
     enemyNode *newEnemyQueue = (enemyNode*)malloc(sizeof(enemyNode));
-    wrappedMutexLock(&enemyListLock);
+    //wrappedMutexLock(&enemyListLock);
     newEnemyQueue->e = e;
     newEnemyQueue->next = NULL;
-    wrappedMutexUnlock(&enemyListLock);
+    //wrappedMutexUnlock(&enemyListLock);
     return newEnemyQueue; // node created and return it
 }
 
 void insertEnemyQueue(enemy *e, enemyNode *enemyQueue) {
     enemyNode *newEnemyQueue = createEnemyQueue(e);
     while(enemyQueue->next != NULL) {
-        wrappedMutexLock(&enemyListLock);
+        //wrappedMutexLock(&enemyListLock);
         enemyQueue = enemyQueue -> next;
-        wrappedMutexUnlock(&enemyListLock);
+        //wrappedMutexUnlock(&enemyListLock);
     }
-    wrappedMutexLock(&enemyListLock);
+    //wrappedMutexLock(&enemyListLock);
     enemyQueue->next = newEnemyQueue;
-    wrappedMutexUnlock(&enemyListLock);
+    //wrappedMutexUnlock(&enemyListLock);
 }
 
 void deleteEnemy(enemy *e) {
     if(enemyQueue->e->thread == e->thread) {
         if(enemyQueue->next == NULL) {
-            wrappedMutexLock(&enemyListLock);
+            //wrappedMutexLock(&enemyListLock);
             enemyQueue = NULL;
-            wrappedMutexUnlock(&enemyListLock);
+            //wrappedMutexUnlock(&enemyListLock);
         }
         else {
-            wrappedMutexLock(&enemyListLock);
+            //wrappedMutexLock(&enemyListLock);
             enemyQueue = enemyQueue->next;
-            wrappedMutexUnlock(&enemyListLock);
+            //wrappedMutexUnlock(&enemyListLock);
         }
-        wrappedMutexLock(&enemyListLock);
+        //wrappedMutexLock(&enemyListLock);
         pthread_cancel(e->thread);
         pthread_join(e->thread, NULL);
         free(e);
-        wrappedMutexUnlock(&enemyListLock);
+        //wrappedMutexUnlock(&enemyListLock);
     }
     else {
         while(enemyQueue->next != NULL) {
             if(enemyQueue->next->e->thread == e->thread) {
-                wrappedMutexLock(&enemyListLock);
+                //wrappedMutexLock(&enemyListLock);
                 enemyQueue->next = enemyQueue->next->next;
 
                 pthread_cancel(e->thread);
                 pthread_join(e->thread, NULL);
                 free(e);
-                wrappedMutexUnlock(&enemyListLock);
+                //wrappedMutexUnlock(&enemyListLock);
                 break;
             }
         }
@@ -168,24 +168,24 @@ void spawnPlayerBullet(int startRow, int startCol, player *p, pthread_mutex_t *s
 
 BulletNode* createBulletQueue(playerBullet *pb, enemyBullet *eb) {
     BulletNode *newBulletQueue = (BulletNode*)malloc(sizeof(BulletNode));
-    wrappedMutexLock(&bulletListLock);
+    //wrappedMutexLock(&bulletListLock);
     newBulletQueue->pb = pb;
     newBulletQueue->eb = eb;
     newBulletQueue->next = NULL;
-    wrappedMutexUnlock(&bulletListLock);
+    //wrappedMutexUnlock(&bulletListLock);
     return newBulletQueue; // node created and return it
 }
 
 void insertBulletQueue(playerBullet *pb, enemyBullet *eb, BulletNode *BulletQueue) {
     BulletNode *newBulletQueue = createBulletQueue(pb, eb);
     while(BulletQueue->next != NULL) {
-        wrappedMutexLock(&bulletListLock);
+        //wrappedMutexLock(&bulletListLock);
         BulletQueue = BulletQueue -> next;
-        wrappedMutexUnlock(&bulletListLock);
+        //wrappedMutexUnlock(&bulletListLock);
     }
-    wrappedMutexLock(&bulletListLock);
+    //wrappedMutexLock(&bulletListLock);
     BulletQueue->next = newBulletQueue;
-    wrappedMutexUnlock(&bulletListLock);
+    //wrappedMutexUnlock(&bulletListLock);
 }
 
 void deleteBullet(playerBullet *pb, enemyBullet *eb) {
@@ -194,40 +194,40 @@ void deleteBullet(playerBullet *pb, enemyBullet *eb) {
         if(bulletQueue->pb->thread == pb->thread) {
             // head is the player bullet we wanna delete
             if(bulletQueue->next == NULL) {
-                wrappedMutexLock(&bulletListLock);
+                //wrappedMutexLock(&bulletListLock);
                 bulletQueue = NULL;
-                wrappedMutexUnlock(&bulletListLock);
+                //wrappedMutexUnlock(&bulletListLock);
             }
             else {
-                wrappedMutexLock(&bulletListLock);
+                //wrappedMutexLock(&bulletListLock);
                 bulletQueue = bulletQueue -> next;
-                wrappedMutexUnlock(&bulletListLock);
+                //wrappedMutexUnlock(&bulletListLock);
             }
-            wrappedMutexLock(&bulletListLock);
+            //wrappedMutexLock(&bulletListLock);
             pthread_cancel(pb->thread);
             pthread_join(pb->thread, NULL);
             free(pb);
-            wrappedMutexUnlock(&bulletListLock);
+            //wrappedMutexUnlock(&bulletListLock);
         }
         else {
             // the bullet we wanna delete it not the head
             while(bulletQueue->next != NULL) {
                 if(bulletQueue->next->pb->thread == pb->thread) {
                     if(bulletQueue -> next -> next == NULL) {
-                        wrappedMutexLock(&bulletListLock);
+                        //wrappedMutexLock(&bulletListLock);
                         bulletQueue->next = NULL;
-                        wrappedMutexUnlock(&bulletListLock);
+                        //wrappedMutexUnlock(&bulletListLock);
                     }
                     else {
-                        wrappedMutexLock(&bulletListLock);
+                        //wrappedMutexLock(&bulletListLock);
                         bulletQueue->next = bulletQueue -> next -> next;
-                        wrappedMutexUnlock(&bulletListLock);
+                        //wrappedMutexUnlock(&bulletListLock);
                     }
-                    wrappedMutexLock(&bulletListLock);
+                    //wrappedMutexLock(&bulletListLock);
                     pthread_cancel(pb->thread);
                     pthread_join(pb->thread, NULL);
                     free(pb);
-                    wrappedMutexUnlock(&bulletListLock);
+                    //wrappedMutexUnlock(&bulletListLock);
                     break;
                 }
             }
@@ -238,40 +238,40 @@ void deleteBullet(playerBullet *pb, enemyBullet *eb) {
         if(bulletQueue->eb->thread == eb->thread) {
             // head is the player bullet we wanna delete
             if(bulletQueue->next == NULL) {
-                wrappedMutexLock(&bulletListLock);
+                //wrappedMutexLock(&bulletListLock);
                 bulletQueue = NULL;
-                wrappedMutexUnlock(&bulletListLock);
+                //wrappedMutexUnlock(&bulletListLock);
             }
             else {
-                wrappedMutexLock(&bulletListLock);
+                //wrappedMutexLock(&bulletListLock);
                 bulletQueue = bulletQueue -> next;
-                wrappedMutexUnlock(&bulletListLock);
+                //wrappedMutexUnlock(&bulletListLock);
             }
-            wrappedMutexLock(&bulletListLock);
+            //wrappedMutexLock(&bulletListLock);
             pthread_cancel(eb->thread);
             pthread_join(eb->thread, NULL);
             free(eb);
-            wrappedMutexUnlock(&bulletListLock);
+            //wrappedMutexUnlock(&bulletListLock);
         }
         else {
             // the bullet we wanna delete it not the head
             while(bulletQueue->next != NULL) {
                 if(bulletQueue->next->eb->thread == eb->thread) {
                     if(bulletQueue -> next -> next == NULL) {
-                        wrappedMutexLock(&bulletListLock);
+                        //wrappedMutexLock(&bulletListLock);
                         bulletQueue->next = NULL;
-                        wrappedMutexUnlock(&bulletListLock);
+                        //wrappedMutexUnlock(&bulletListLock);
                     }
                     else {
-                        wrappedMutexLock(&bulletListLock);
+                        //wrappedMutexLock(&bulletListLock);
                         bulletQueue->next = bulletQueue -> next -> next;
-                        wrappedMutexUnlock(&bulletListLock);
+                        //wrappedMutexUnlock(&bulletListLock);
                     }
-                    wrappedMutexLock(&bulletListLock);
+                    //wrappedMutexLock(&bulletListLock);
                     pthread_cancel(eb->thread);
                     pthread_join(eb->thread, NULL);
                     free(eb);
-                    wrappedMutexUnlock(&bulletListLock);
+                    //wrappedMutexUnlock(&bulletListLock);
                     break;
                 }
             }

@@ -162,6 +162,7 @@ void *runConsoleRefresh(void *data) {
                 wrappedMutexLock(&screenLock);
                 consoleRefresh();
                 wrappedMutexUnlock(&screenLock);
+                sleepTicks(1);
         }
         pthread_exit(NULL);
 }
