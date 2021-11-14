@@ -19,7 +19,7 @@ void *runUpkeep(void *data) {
         wrappedMutexUnlock(p->mutex);
 
         /* Regularly check if there is no enemy left */
-        sleepTicks(3);
+        sleepTicks(1);
         enemyNode *enemyList = getEnemyQueue();
         if(enemyList == NULL) {
             p->state = GAMEOVER; // Let the player win
@@ -34,14 +34,14 @@ void *runUpkeep(void *data) {
                     consoleClearImage(bulletList->eb->row, bulletList->eb->col, BULLET_SIZE, BULLET_SIZE);
                     wrappedMutexUnlock(p->mutex);
                     pthread_cancel(bulletList->eb->thread);
-                    pthread_join(bulletList->eb->thread, NULL);
+                    //pthread_join(bulletList->eb->thread, NULL);
                 }
                 else if(bulletList->pb != NULL) {
                     wrappedMutexLock(p->mutex);
                     consoleClearImage(bulletList->pb->row, bulletList->pb->col, BULLET_SIZE, BULLET_SIZE);
                     wrappedMutexUnlock(p->mutex);
                     pthread_cancel(bulletList->pb->thread);
-                    pthread_join(bulletList->pb->thread, NULL);
+                    //pthread_join(bulletList->pb->thread, NULL);
                 }
                 bulletList = bulletList -> next;
             }

@@ -26,7 +26,6 @@ void newEnemyBullet(enemyBullet *eb)
 	eb->row = eb->startRow;
 	eb->col = eb->startCol;
 	eb->animTile = 0;
-	//p->state = GAME;
 }
 
 void newPlayerBullet(playerBullet *pb) 
@@ -34,7 +33,6 @@ void newPlayerBullet(playerBullet *pb)
 	pb->row = pb->startRow;
 	pb->col = pb->startCol;
 	pb->animTile = 0;
-	//p->state = GAME;
 }
 
 /********************THREAD functions***************/
@@ -42,10 +40,6 @@ void *runEnemyBullet(void *data) {
     enemyBullet* eb = (enemyBullet*)data;
     newEnemyBullet(eb);
     while(eb->p->running && eb->p->lives > 0) {
-
-        if(eb->p->state == DEAD) {
-            consoleClearImage(eb->row, eb->col, BULLET_SIZE, BULLET_SIZE);
-        }
 
         char** enemy_bullet_tile = ENEMY_BULLET[BULLET_ANIM_TILES-1];
 
@@ -90,9 +84,6 @@ void *runPlayerBullet(void *data) {
     newPlayerBullet(pb);
     pb->p->score = pb->p->score + 1;
     while(pb->p->running && pb->p->lives > 0) {
-        if(pb->p->state == DEAD) {
-            consoleClearImage(pb->row, pb->col, BULLET_SIZE, BULLET_SIZE);
-        }
 
         char** player_bullet_tile = PLAYER_BULLET[BULLET_ANIM_TILES-1];
 

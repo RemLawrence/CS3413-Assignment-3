@@ -142,6 +142,4 @@ void *runPlayerT(void *data)
 
 void killPlayer(player* p) {
 	p->state = DEAD;
-	// Instead of p->lives--, change player state to DEAD and call a freeze screen method?
-	// TODO: and freeze screen
 }
