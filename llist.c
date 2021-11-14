@@ -35,12 +35,18 @@ void spawnEnemy(int startRow, int startCol, int length, char* direction, bool sp
         wrappedMutexInit(e->mutex, NULL);
         wrappedPthreadCreate(&(e->thread), NULL, runEnemy, (void*)e);
 
-        if(first) {
-            enemyQueue = createEnemyQueue(e);
-            first = false;
+        /* If the enemy's length < 5, then it will die and thread will exit */
+        if(e->length <= 4) {
+            break;
         }
         else {
-            insertEnemyQueue(e, enemyQueue);
+            if(first) {
+                enemyQueue = createEnemyQueue(e);
+                first = false;
+            }
+            else {
+                insertEnemyQueue(e, enemyQueue);
+            }
         }
 
         /* If this method is called by the spawn thread, it has the responsibility to spawn new enemy with length=80 */
