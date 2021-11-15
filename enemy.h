@@ -1,3 +1,13 @@
+/**********************************************************************
+  Module: enemy.h
+  Author: Micah Hanmin Wang
+
+  Purpose: Manages the invaders (aka enemies, centipedes, caterpillers)
+  Stores the constants that the enemy threads needed.
+  Declares the enemy struct
+
+**********************************************************************/
+
 #ifndef ENEMY_H
 #define ENEMY_H
 

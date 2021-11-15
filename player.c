@@ -1,10 +1,12 @@
 /**********************************************************************
   Module: player.c
-  Author: Daniel Rea
+  Author: Micah Hanmin Wang
 
   Contains all the functions related to the player, including initializing
   a new player, initialize the player thread function, player animation, 
+  player moves, and killing player (lives--).
 
+  Also contains the thread function for the player thread.
 
 **********************************************************************/
 
@@ -16,7 +18,6 @@
 #include <stdlib.h>
 
 //sample player graphic, 3 tile animation.
-//feel free to use this or make your own
 char* playerGraphic[PLAYER_ANIM_TILES][PLAYER_HEIGHT] = 
 {
     {"/T_T\\",
@@ -35,6 +36,10 @@ char* playerGraphic[PLAYER_ANIM_TILES][PLAYER_HEIGHT] =
 
 /********************support functions***************/
 /* reset the player state to start */
+
+/********************************************************** 
+    Initialize player's initial position (row+col)
+ **********************************************************/
 void newPlayer(player *p) 
 {
 	p->row = p->startRow;
@@ -43,31 +48,44 @@ void newPlayer(player *p)
 	p->state = GAME;
 }
 
+/********************************************************** 
+    Refraw the player based on updated positions.
+	Screen lock required.
+ **********************************************************/
 void _playerRedrawMoved(player *p, int prevRow, int prevCol, bool lock) 
 {
-	//TODO
-	//Dear students, this function is NOT THREAD SAFE and will require fixing
-	//TODO: lock screen (critical shared resource)
 	if(lock) {
+		/* Lock the screen when redraw (clear_draw) the player */
 		wrappedMutexLock(p->mutex);
 		consoleClearImage(prevRow, prevCol, PLAYER_HEIGHT, PLAYER_WIDTH);
 		consoleDrawImage(p->row, p->col, playerGraphic[p->animTile], PLAYER_HEIGHT);
 		wrappedMutexUnlock(p->mutex);
 	}
-	//TODO: unlock screen
 }
 
+/********************************************************** 
+    Calls _playerRedrawMoved function to redraw the player 
+	based on the updated player's poistions
+ **********************************************************/
 void playerRedraw(player *p, bool lock) 
 {
 	_playerRedrawMoved(p, p->row, p->col, lock);
 }
 
+/********************************************************** 
+    Move (redraw) the player based on the updated player's 
+	positions (dRow and dCol)
+ **********************************************************/
 void playerMove(player *f, int dRow, int dCol) {
 	_playerRedrawMoved(f, dRow, dCol, true);
 }
 
 /********************THREAD functions***************/
 
+/********************************************************** 
+    Initialize and spawn the player, calls the player thread
+	function with the created player object passed in.
+ **********************************************************/
 player* spawnPlayer(int startRow, int startCol, int lives, pthread_mutex_t *screenLock, pthread_cond_t *cond_cv)
 {
     player* p = (player*)(malloc(sizeof(player)));
@@ -76,8 +94,9 @@ player* spawnPlayer(int startRow, int startCol, int lives, pthread_mutex_t *scre
         fprintf(stderr, "Fatal: failed to allocate %zu bytes.\n", sizeof(player));
         abort();
     }
-	p->lives = lives;
-	p->score = 0;
+
+	p->lives = lives; // Lives Initialized to 4
+	p->score = 0; // Score initialized to 0
 	p->startCol = startCol;
 	p->startRow = startRow;
 	p->running = true;
@@ -89,6 +108,13 @@ player* spawnPlayer(int startRow, int startCol, int lives, pthread_mutex_t *scre
 	return p;
 }
 
+/********************************************************** 
+    Player Thread function.
+    Initialize the new player. Manages the player's state switch.
+	If the player is being hit, respawn the player to the original position.
+	If player wins, send the signal.
+	Manages the change of animTiles, to let the player animate when redraw.
+ **********************************************************/
 void *runPlayerT(void *data) 
 {
 	// Pass the reference to the player p
@@ -98,13 +124,11 @@ void *runPlayerT(void *data)
 	
 	while (p->running && p->lives > 0) 
 	{
-		//TODO: not threadsafe!!!!
 		switch(p->state)
 		{
 			case DEAD:
-				//wrappedMutexLock(p->mutex);
 				p->lives--;
-				/* Freeze the screen */
+				/* Freeze the player when it's being hit */
 				sleep(2);
 				wrappedMutexLock(p->mutex);
 				consoleClearImage(p->row, p->col, PLAYER_HEIGHT, PLAYER_WIDTH); /* Clears the hit position */
@@ -128,12 +152,13 @@ void *runPlayerT(void *data)
 				wrappedMutexLock(p->mutex);
 				putBanner("You win!!!");
 				wrappedMutexUnlock(p->mutex);
+				/* Send the signal to let the main program wake up & do the clean up */
 				wrappedCondSignal(p->cond_cv);
 			default:
 				;
 		}
 
-		// Make the spaceship animation
+		/* Make the spaceship animation */
 		wrappedMutexLock(p->mutex);
 		p->animTile++;
 		p->animTile %= PLAYER_ANIM_TILES;
@@ -141,11 +166,14 @@ void *runPlayerT(void *data)
 
 		playerRedraw(p, true);
 		sleepTicks(PLAYER_ANIM_TICKS);
-		
 	}
 	pthread_exit(NULL);
 }
 
+/********************************************************** 
+    Kill the player when its being hit by an enemy bullet.
+	Switch the player's STATE to DEAD
+ **********************************************************/
 void killPlayer(player* p) {
 	p->state = DEAD;
 }

@@ -1,3 +1,18 @@
+/**********************************************************************
+  Module: llist.c
+  Author: Micah Hanmin Wang
+
+  Contains the function for spawning enemy, and adds it to linked list 
+  once a caterpiller thread is created.
+  Also contains functions for spawning player bullet and enemy bullet, 
+  same for the caterpiller ones, store them to the bullet linked list
+  once created.
+
+  Purpose: Manages spawning new enemy and adds enemy & both bullets to the
+  linked list. Manages linked list (create, insert and delete from it)
+
+**********************************************************************/
+
 #include "llist.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -5,13 +20,18 @@
 #include <string.h>
 #include <pthread.h>
 
-enemyNode* enemyQueue;
+enemyNode* enemyQueue; /* Caterpiller's Linked List */
 
-BulletNode *bulletQueue;
+BulletNode *bulletQueue; /* Linked List for both type of bullets */
 pthread_mutex_t bulletListLock;
-bool first = true;
+bool first = true; /* Flag for controlling if the caterpiller linked list is created or not */
 pthread_mutex_t enemyListLock;
 
+/********************************************************** 
+    Initializing and creating new caterpiller and new caterpiller
+    thread. Scheduling spawning new enemies and also create small
+    ones after the original big caterpiller's being hit. 
+ **********************************************************/
 void spawnEnemy(int startRow, int startCol, int length, char* direction, bool spawn, player *p, pthread_mutex_t *screenLock)
 {   
     while(p->running && p->lives > 0) {
@@ -21,35 +41,33 @@ void spawnEnemy(int startRow, int startCol, int length, char* direction, bool sp
             fprintf(stderr, "Fatal: failed to allocate %zu bytes.\n", sizeof(enemy));
             abort();
         }
-        e->startCol = startCol; // Initialize the enemy's startCol to the upper left of the console (78)
-        e->startRow = startRow; // Initialize the enemy's startRow to the upper left of the console (2)
-
+        e->startCol = startCol; // Initialize the enemy's startCol
+        e->startRow = startRow; // Initialize the enemy's startRow
         e->isDead = false;
         e->isHit = false;
-
         e->direction = direction;
-
         e->length = length; // Length of the enemy body. Could be deducted when hit!
         e->speed = ENEMY_SPEED; // Initialize the enemy speed to 40
-
         e->mutex = screenLock; // A reference to the screenlock
         e->p = p; // A reference to the player
 
-        //TODO: Init mutex...
         wrappedMutexInit(&enemyListLock, NULL);
         wrappedMutexInit(e->mutex, NULL);
         wrappedPthreadCreate(&(e->thread), NULL, runEnemy, (void*)e);
 
         /* If the enemy's length < 5, then it will die and thread will exit */
         if(e->length <= ENEMY_MIN_WIDTH) {
+            /* CAUTION: This check is to prevent scheduling spawning new caterpillers when the original ones being cut */
             break;
         }
         else {
             if(first) {
+                /* If the `first` flag is still on, then the enemy linked list is not created yet */
                 enemyQueue = createEnemyQueue(e);
-                first = false;
+                first = false; // Turn off the flag
             }
             else {
+                /* If the caterpiller Linked list is created, then ust insert the new one */
                 insertEnemyQueue(e, enemyQueue);
             }
         }
@@ -65,6 +83,9 @@ void spawnEnemy(int startRow, int startCol, int length, char* direction, bool sp
     }
 }
 
+/********************************************************** 
+    Just creates a new Caterpiller Linked List.
+ **********************************************************/
 enemyNode* createEnemyQueue(enemy *e) {
     enemyNode *newEnemyQueue = (enemyNode*)malloc(sizeof(enemyNode));
     /* error checking */
@@ -79,6 +100,10 @@ enemyNode* createEnemyQueue(enemy *e) {
     return newEnemyQueue; // node created and return it
 }
 
+/********************************************************** 
+    Insert a new created caterpiller into the caterpiller Linked
+    list.
+ **********************************************************/
 void insertEnemyQueue(enemy *e, enemyNode *enemyQueue) {
     enemyNode *newEnemyQueue = createEnemyQueue(e);
     while(enemyQueue->next != NULL) {
@@ -91,6 +116,10 @@ void insertEnemyQueue(enemy *e, enemyNode *enemyQueue) {
     //wrappedMutexUnlock(&enemyListLock);
 }
 
+/********************************************************** 
+    Delete a caterpiller based on its thread # from the caterpiller
+    Linked List.
+ **********************************************************/
 void deleteEnemy(enemy *e) {
     while(enemyQueue != NULL) {
         if(enemyQueue->e->isDead) {
@@ -102,13 +131,21 @@ void deleteEnemy(enemy *e) {
     }
 }
 
+/********************************************************** 
+    Get the head pointer to the enemy Linked list
+ **********************************************************/
 enemyNode* getEnemyQueue() {
     return enemyQueue;
 }
 
 
 
-
+/********************************************************** 
+    Initializing and creating new enemy bullets and enemy bullet
+    threads. 
+    Also manages creating Bullet Linked List (if enemy bullet appears first)
+    and inserting new enemy bullets into the Bullet Linked List.
+ **********************************************************/
 void spawnEnemyBullet(int startRow, int startCol, player *p, pthread_mutex_t *screenLock)
 {
     enemyBullet* eb = (enemyBullet*)(malloc(sizeof(enemyBullet)));
@@ -123,7 +160,6 @@ void spawnEnemyBullet(int startRow, int startCol, player *p, pthread_mutex_t *sc
     eb->llist = &bulletListLock;
     eb->p = p;
 
-    //TODO: Init mutex...
     wrappedMutexInit(&bulletListLock, NULL); // Initialize bulletListLock
 	wrappedMutexInit(eb->mutex, NULL);
 	wrappedPthreadCreate(&(eb->thread), NULL, runEnemyBullet, (void*)eb);
@@ -140,6 +176,12 @@ void spawnEnemyBullet(int startRow, int startCol, player *p, pthread_mutex_t *sc
     }
 }
 
+/********************************************************** 
+    Initializing and creating new player bullets and player bullet
+    threads. 
+    Also manages creating Bullet Linked List (if player bullet appears first)
+    and inserting new player bullets into the Bullet Linked List.
+ **********************************************************/
 void spawnPlayerBullet(int startRow, int startCol, player *p, pthread_mutex_t *screenLock)
 {
     //wrappedMutexInit(&bulletListLock, NULL); // Initialize bulletListLock
@@ -168,6 +210,9 @@ void spawnPlayerBullet(int startRow, int startCol, player *p, pthread_mutex_t *s
     }
 }
 
+/********************************************************** 
+    Just creates a new Bullet Linked List
+ **********************************************************/
 BulletNode* createBulletQueue(playerBullet *pb, enemyBullet *eb) {
     BulletNode *newBulletQueue = (BulletNode*)malloc(sizeof(BulletNode));
     /* error checking */
@@ -183,6 +228,10 @@ BulletNode* createBulletQueue(playerBullet *pb, enemyBullet *eb) {
     return newBulletQueue; // node created and return it
 }
 
+/********************************************************** 
+    Insert a new created bullet into the Bullet Linked
+    list.
+ **********************************************************/
 void insertBulletQueue(playerBullet *pb, enemyBullet *eb, BulletNode *BulletQueue) {
     BulletNode *newBulletQueue = createBulletQueue(pb, eb);
     while(BulletQueue->next != NULL) {
@@ -195,6 +244,10 @@ void insertBulletQueue(playerBullet *pb, enemyBullet *eb, BulletNode *BulletQueu
     //wrappedMutexUnlock(&bulletListLock);
 }
 
+/********************************************************** 
+    Delete a bullet based on its thread # from the bullet
+    Linked List.
+ **********************************************************/
 void deleteBullet(playerBullet *pb, enemyBullet *eb) {
     //BulletNode *jobQueueInProcess = bulletQueue;
     if(pb != NULL) {
@@ -225,6 +278,9 @@ void deleteBullet(playerBullet *pb, enemyBullet *eb) {
     }
 }
 
+/********************************************************** 
+    Get the head pointer to the Bullet Linked list
+ **********************************************************/
 BulletNode* getBulletQueue() {
     return bulletQueue;
 }

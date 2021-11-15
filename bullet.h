@@ -1,3 +1,13 @@
+/**********************************************************************
+  Module: bullet.h
+  Author: Micah Hanmin Wang
+
+  Purpose: Manages both player's and caterpiller's bullets
+  Stores the constants that the bullets needed.
+  Declares the enemyBullet and playerBullet's struct
+
+**********************************************************************/
+
 #ifndef BULLET_H
 #define BULLET_H
 

@@ -1,3 +1,13 @@
+/**********************************************************************
+  Module: llist.h
+  Author: Micah Hanmin Wang
+
+  Purpose: Manages caterpiller linked list and bullet linked list
+  Stores the constants that these two linked lists needed.
+  Declares caterpiller's and bullet's linked lists struct
+
+**********************************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>

@@ -1,6 +1,6 @@
 /**********************************************************************
   Module: centipede.c
-  Author: Daniel Rea
+  Author: Micah Hanmin Wang
 
   Purpose: the core source file for the game engine. This manages the
   thread initialization of all parts, provides functions for global lock
@@ -10,8 +10,8 @@
   The main game loop sleeps and waits for when the game ends (either player wins,
   loses, or the game quits)
 
-  Includes thread functions for: keyboard thread, refresh thread, and enemy spawn
-  thread.
+  Includes thread functions for: keyboard thread, refresh thread, enemy spawn
+  thread and upkeep thread.
 
 **********************************************************************/
 #include "centipede.h"
@@ -26,7 +26,7 @@
 #define GAME_ROWS 24
 #define GAME_COLS 80
 
-/**** DIMENSIONS MUST MATCH the ROWS/COLS */
+/**** INITIAL GAMEBOARD */
 char *GAME_BOARD[] = {
 "                   Score:    0     Lives:    4",
 "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-centipiede!=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=",
@@ -53,31 +53,39 @@ char *GAME_BOARD[] = {
 "", 
 "" };
 
-pthread_mutex_t screenLock; // Screen Lock
+/* The one, true, screen lock that will control each thread's drawing to the screen */
+pthread_mutex_t screenLock;
 
-//initialize keyboard thread
+/* keyboard thread */
 pthread_t keyboard_thread;
+/* keyboard thread's mutex */
 pthread_mutex_t keyboard_mutex;
-//initialize redraw/refresh thread
+/* refresh thread */
 pthread_t refresh_thread;
+/* refresh thread's mutex */
 pthread_mutex_t refresh_mutex;
-//initialize spawn enemy thread
+/* spawn thread */
 pthread_t spawn_thread;
-//initialize upkeep thread
+/* upkeep thread */
 pthread_t upkeep_thread;
+/* upkeep thread's mutex */
 pthread_mutex_t upkeep_mutex;
 
+/* The condition variable mutex */
 pthread_mutex_t cond_mutex;
+/* The condition variable which waits for the game to end */
 pthread_cond_t  cond_cv;
 
-//the rest will hold the main game engine
-//it's likely you'll add quite a bit to it (input, cleanup, synchronization, etc)
-
-//you'll probably want a sort of globally accessible function to the player, enemy, etc
-//to control screen locking here.
-
+/********************************************************** 
+    Keyboard Thread function.
+    Reads keyboard input and move the player
+    or shoots the bullets
+    and detects if 'Q' is pressed to quit the game.
+    Checks if the game ends regularly to stop waiting for
+    getchar().
+ **********************************************************/
 void *runKeyboard(void* data) {
-    // Pass the reference to the player p
+    /* Pass the reference to the player p */
     player* p = (player*)data;
 
     fd_set rfds;
@@ -100,46 +108,52 @@ void *runKeyboard(void* data) {
         }
         else {
             if(p->state == DEAD) {
+                /* Disable the keyboard input for 1s if the player being shot */
                 sleep(1);
             }
             /* FD_ISSET(0, &rfds) is true so input is available now. */
             char input;
-            input = getchar(); // TODO: NO, THIS IS NOT PERFECT, GAME STILL WAITING FOR THIS 
+            /* Get input from the keyboard */
+            input = getchar(); // TODO: NO, THIS IS NOT PERFECT, GAME STILL WAITING FOR THIS
 
             int prevRow = p->row;
             int prevCol = p->col;
 
             switch(input) {
                 case KEY_W_PREESSED:
-                        // Upper boundary
+                        /* Player going up 1 row */
                         if(p->row > PLAYER_BOUNDARY_ROW) {
+                                /* Update player's pos */
                                 p->row = p->row - 1;
                         }
                         break;
                 case KEY_A_PREESSED:
-                        // Left boundary
+                        /* Player going left 1 col */
                         if(p->col > 0) {
                                 p->col = p->col - 1;
                         }
                         break;
                 case KEY_S_PREESSED:
-                        // Lower boundary
+                        /* Player going down 1 row */
                         if(p->row < GAME_ROWS-PLAYER_HEIGHT) {
+                                /* Update player's pos */
                                 p->row = p->row + 1;
                         }
                         break;
                 case KEY_D_PREESSED:
-                        // Right boundary
+                        /* Player going up 1 row */
                         if(p->col < GAME_COLS-PLAYER_WIDTH) {
+                                /* Update player's pos */
                                 p->col = p->col + 1;
                         }
                         break;
                 case SPACE_PREESSED:
-                        // Shoot bullet
+                        /* Shoot player bullet from its head */
                         spawnPlayerBullet(p->row-1, p->col+2, p, &screenLock);
                         break;
                 case KEY_Q_PREESSED:
                         wrappedMutexLock(&screenLock);
+                        /* Put the quitter banner onto the screen if 'Q' being pressed */
                         putBanner("quitter....");
                         wrappedMutexUnlock(&screenLock);
                         wrappedCondSignal(&cond_cv);
@@ -147,18 +161,27 @@ void *runKeyboard(void* data) {
                 default:
                         break;
             }
-                playerMove(p, prevRow, prevCol);
+            /* Move player with the updated player's pos */
+            playerMove(p, prevRow, prevCol);
         }
     }
     if(p->lives == 0) {
+        /* Player loses, put the game over banner onto the screen */
         wrappedMutexLock(&screenLock);
         putBanner("game over...Do, or do not.. there is no try!");
         wrappedMutexUnlock(&screenLock);
+        /* Send the signal to kill the game & clean up */
         wrappedCondSignal(&cond_cv);
     }
     pthread_exit(NULL);
 }
 
+/********************************************************** 
+    Refresh Thread function.
+    A really simple refresh thread.
+    Performs refresh() every 1 tick, to get the update from
+    the screen buffer onto the screen.
+ **********************************************************/
 void *runConsoleRefresh(void *data) {
         player* p = (player*)data;
         while(p->running && p->lives > 0) {
@@ -170,54 +193,82 @@ void *runConsoleRefresh(void *data) {
         pthread_exit(NULL);
 }
 
+/********************************************************** 
+    Enemy Spawn Thread function.
+    Calls the spawnEnemy() function to spawn the enemy at a 
+    random time (8000 - 10000 ticks)
+    This thread function does not have a loop, it only performs 
+    one time, because the while loop is in the spawnEnemy() function.
+ **********************************************************/
 void *runSpawnThread(void *data) {
         player* p = (player*)data;
+        /* Spawn 1 enemy for now. It starts from the upper right corner with the direction left */
         spawnEnemy(ENEMY_HEIGHT, ENEMY_WIDTH, ENEMY_WIDTH, "left", true, p, &screenLock);
         pthread_exit(NULL);
 }
 
-// THE MAIN, ULTIMATE GAME ENGINE
+/********************************************************** 
+    The main game mechanism function.
+    Initialize the game board, needed locks and threads
+    Then waits (sleeps) on a condition variable.
+    If the signal is caught, it is woken up and do the clean
+    up works.
+ **********************************************************/
 void centipedeRun()
 {
+        /* Initialize the game board */
 	if (consoleInit(GAME_ROWS, GAME_COLS, GAME_BOARD))
         {
-                wrappedMutexInit(&screenLock, NULL); // Initialize screenLock
+                /* Initialize screenLock */
+                wrappedMutexInit(&screenLock, NULL);
 
-                //initialize player on the screen. startRow=20, startColumn=36, lives=4
-                player *p = spawnPlayer(20, 36, 4, &screenLock, &cond_cv);
+                /* Initialize player on the screen. startRow=20, startColumn=36, lives=4 */
+                player *p = spawnPlayer(PLAYER_START_ROW, PLAYER_START_COL, PLAYER_INIT_LIVES, &screenLock, &cond_cv);
 
-                //initialize the spawn thread on the screen. startRow=0, startColumn=80
+                /* Initialize the spawn thread on the screen. startRow=0, startColumn=80 */
                 wrappedPthreadCreate(&(spawn_thread), NULL, runSpawnThread, (void*)p);
 
                 wrappedMutexInit(&keyboard_mutex, NULL);
+                /* Initialize keyboard thread */
                 wrappedPthreadCreate(&(keyboard_thread), NULL, runKeyboard, (void*)p);
 
                 wrappedMutexInit(&refresh_mutex, NULL);
+                /* Initialize refresh thread */
                 wrappedPthreadCreate(&(refresh_thread), NULL, runConsoleRefresh, (void*)p);
 
                 wrappedMutexInit(&upkeep_mutex, NULL);
+                /* Initialize the upkeep thread */
                 wrappedPthreadCreate(&(upkeep_thread), NULL, runUpkeep, (void*)p);              
-                
-                //above, initialize all the threads you need
-                //below, you should make a "gameplay loop" that manages screen drawing
-                //that  waits on a condition variable until the game is over
-                //and coordinates all threads to end
 
-                //note after this the player thread keeps running and isn't cleaned
-                //up properly. Why don't we see it update on screen?
                 pthread_cond_init(&cond_cv, NULL);
-                wrappedMutexInit(&cond_mutex, NULL); // Initialize screenLock
+                wrappedMutexInit(&cond_mutex, NULL);
                 wrappedMutexLock(&cond_mutex);
+                /* Sleeps on a condition variable */
                 wrappedCondWait(&cond_cv, &cond_mutex);
                 wrappedMutexUnlock(&cond_mutex);
 
+                /* After woken up, clean up all the threads and memories */
                 cleanUp(p);
-                finalKeypress(); /* wait for final key before killing curses and game */
+                /* wait for final key before killing curses and game */
+                finalKeypress();
 
         }
         consoleFinish();
 }
 
+/********************************************************** 
+    Does the clean up work when the game ends (quit, win, lose).
+    Joins:
+    1. Player thread
+    2. Keyboard thread
+    3. Refresh thread
+    4. Upkeep thread
+    5. Enemy Spawn thread
+    6. Enemy threads
+    7. Player & Enemy Bullet threads
+    And destroys all mutexes, and the condition variable
+    Also frees all the malloced memories.
+ **********************************************************/
 void cleanUp(player *p) {
         p->running = false;
 
@@ -257,6 +308,10 @@ void cleanUp(player *p) {
 
         pthread_mutex_destroy(&cond_mutex);
         pthread_cond_destroy(&cond_cv);
+
+        pthread_mutex_destroy(&keyboard_mutex);
+        pthread_mutex_destroy(&refresh_mutex);
+        pthread_mutex_destroy(&upkeep_mutex);
 
         pthread_mutex_destroy(&screenLock);
 

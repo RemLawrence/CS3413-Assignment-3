@@ -1,15 +1,9 @@
 /**********************************************************************
   Module: player.h
-  Author: Daniel Rea
+  Author: Micah Hanmin Wang
 
   Purpose: manages the player's ship for invaders
-  cut down from my solution to distribute as sample framework code
-
-  Use this to get an idea of how to add things as part of the game.
-  Feel free to use any of this freely in your solution, or change or modify
-  this code.
-
-  Some functions unimplemented, just to show how I roughly went about things.
+  Stores the constants that the Upkeep threads need.
 
 **********************************************************************/
 

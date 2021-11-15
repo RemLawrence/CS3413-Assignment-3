@@ -1,3 +1,12 @@
+/**********************************************************************
+  Module: centipede.h
+  Author: Micah Hanmin Wang
+
+  Stores the constants that the main program (centipede.c) needs, such 
+  as the keyboard strokes.
+
+**********************************************************************/
+
 #ifndef EXAMPLE_H
 #define EXAMPLE_H
 
@@ -19,6 +28,10 @@
 
 #define ENEMY_HEIGHT 2
 #define ENEMY_WIDTH 80
+
+#define PLAYER_START_ROW 20
+#define PLAYER_START_COL 36
+#define PLAYER_INIT_LIVES 4
 
 void *runKeyboard(void *data);
 

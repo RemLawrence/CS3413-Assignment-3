@@ -1,3 +1,11 @@
+/**********************************************************************
+  Module: gameglobals.h
+  Author: Micah Hanmin Wang
+
+  Stores the constants that the Upkeep threads need.
+
+**********************************************************************/
+
 #include "console.h"
 #include "centipede.h"
 #include "player.h"
