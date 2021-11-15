@@ -42,6 +42,7 @@ void *runEnemy(void *data) {
     int j = 0; // aka. rightIncrementor
 
     while(e->p->running && e->p->lives > 0) {
+        /* If the player is being shot, freeze all centipede for 2s */
         if(e->p->state == DEAD) {
             sleep(2);
         }
@@ -82,11 +83,12 @@ void *runEnemy(void *data) {
         char tempArray[2][e->length+1];
 
         if(e->length != ENEMY_WIDTH) {
-            // The enemy is hit and needs to have the anim tiles cut off.
+            /* The enemy is hit and needs to have the anim tiles cut off. */
+            /* This one is for right cut off */
             int height_index = 0;
             int width_index = 0;
             for(height_index = 0; height_index < ENEMY_HEIGHT; height_index++) {
-                char body_right[2][81];
+                char body_right[2][81]={"0","0"};
                 int z = 0;
                 for (width_index = 0; width_index < e->length; width_index++) {
                     body_right[height_index][z] = tile_left[height_index][width_index];
@@ -102,6 +104,7 @@ void *runEnemy(void *data) {
                 tile_right[height_index] = tempArray[height_index]; // Assign tile_right the body value
             }
 
+            /* This one is for left cut off */
             height_index = 0;
             width_index = 0;
             for(height_index = 0; height_index < ENEMY_HEIGHT; height_index++) {
@@ -118,8 +121,7 @@ void *runEnemy(void *data) {
             
             if(e->startRow == e->row) {
                 /* This means this centipede is being cut, so startRow is not meant as a prevRow. It's its new row. */
-                /* Hence, we should not handle the turning body on the previous row anymore */
-
+                /* Hence, we should handle the turning body on the previous row in a different calculation */
                 wrappedMutexLock(e->mutex);
                 // e->startRow is the previous row, -(e->col+j) is the previous centipede col location
                 consoleClearImage(e->startRow-2, -e->col-1, ENEMY_HEIGHT, e->length);
@@ -185,8 +187,7 @@ void *runEnemy(void *data) {
             if(e->row != ENEMY_FIRST_ROW) {
                 if(e->startRow == e->row) {
                     /* This means this centipede is being cut, so startRow is not meant as a prevRow. It's its new row. */
-                    /* Hence, we should not handle the turning body on the previous row anymore */
-
+                    /* Hence, we should handle the turning body on the previous row in a different calculation */
                     //If e-> row does not equal to 2, then the centipede is not on the first row
                     wrappedMutexLock(e->mutex);
                     // e->row-2 is the previous row, e->startCol-i is the previous centipede col location
