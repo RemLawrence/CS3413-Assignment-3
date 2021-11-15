@@ -107,62 +107,69 @@ void *runKeyboard(void* data) {
             exit(EXIT_FAILURE);
         }
         else {
-            if(p->state == DEAD) {
-                /* Disable the keyboard input for 1s if the player being shot */
-                sleep(1);
-            }
-            /* FD_ISSET(0, &rfds) is true so input is available now. */
-            char input;
-            /* Get input from the keyboard */
-            input = getchar(); // TODO: NO, THIS IS NOT PERFECT, GAME STILL WAITING FOR THIS
+                /* If timeout (retval == 0), check if the game ends and stop always blocking on getchar() */
+                if(p->running && p->lives > 0) {
+                        if(p->state == DEAD) {
+                                /* Disable the keyboard input for 1s if the player being shot */
+                                sleep(1);
+                        }
+                        /* FD_ISSET(0, &rfds) is true so input is available now. */
+                        char input;
+                        /* Get input from the keyboard */
+                        input = getchar();
 
-            int prevRow = p->row;
-            int prevCol = p->col;
+                        int prevRow = p->row;
+                        int prevCol = p->col;
 
-            switch(input) {
-                case KEY_W_PREESSED:
-                        /* Player going up 1 row */
-                        if(p->row > PLAYER_BOUNDARY_ROW) {
-                                /* Update player's pos */
-                                p->row = p->row - 1;
+                        switch(input) {
+                                case KEY_W_PREESSED:
+                                        /* Player going up 1 row */
+                                        if(p->row > PLAYER_BOUNDARY_ROW) {
+                                                /* Update player's pos */
+                                                p->row = p->row - 1;
+                                        }
+                                        break;
+                                case KEY_A_PREESSED:
+                                        /* Player going left 1 col */
+                                        if(p->col > 0) {
+                                                p->col = p->col - 1;
+                                        }
+                                        break;
+                                case KEY_S_PREESSED:
+                                        /* Player going down 1 row */
+                                        if(p->row < GAME_ROWS-PLAYER_HEIGHT) {
+                                                /* Update player's pos */
+                                                p->row = p->row + 1;
+                                        }
+                                        break;
+                                case KEY_D_PREESSED:
+                                        /* Player going up 1 row */
+                                        if(p->col < GAME_COLS-PLAYER_WIDTH) {
+                                                /* Update player's pos */
+                                                p->col = p->col + 1;
+                                        }
+                                        break;
+                                case SPACE_PREESSED:
+                                        /* Shoot player bullet from its head */
+                                        spawnPlayerBullet(p->row-1, p->col+2, p, &screenLock);
+                                        break;
+                                case KEY_Q_PREESSED:
+                                        wrappedMutexLock(&screenLock);
+                                        /* Put the quitter banner onto the screen if 'Q' being pressed */
+                                        putBanner("quitter....");
+                                        wrappedMutexUnlock(&screenLock);
+                                        wrappedCondSignal(&cond_cv);
+                                        break;
+                                default:
+                                        break;
                         }
+                        /* Move player with the updated player's pos */
+                        playerMove(p, prevRow, prevCol);
+                }
+                else {
+                        /* If the game ends (player->lives == 0), then jumps out of the keyboard thread and do cleanup */
                         break;
-                case KEY_A_PREESSED:
-                        /* Player going left 1 col */
-                        if(p->col > 0) {
-                                p->col = p->col - 1;
-                        }
-                        break;
-                case KEY_S_PREESSED:
-                        /* Player going down 1 row */
-                        if(p->row < GAME_ROWS-PLAYER_HEIGHT) {
-                                /* Update player's pos */
-                                p->row = p->row + 1;
-                        }
-                        break;
-                case KEY_D_PREESSED:
-                        /* Player going up 1 row */
-                        if(p->col < GAME_COLS-PLAYER_WIDTH) {
-                                /* Update player's pos */
-                                p->col = p->col + 1;
-                        }
-                        break;
-                case SPACE_PREESSED:
-                        /* Shoot player bullet from its head */
-                        spawnPlayerBullet(p->row-1, p->col+2, p, &screenLock);
-                        break;
-                case KEY_Q_PREESSED:
-                        wrappedMutexLock(&screenLock);
-                        /* Put the quitter banner onto the screen if 'Q' being pressed */
-                        putBanner("quitter....");
-                        wrappedMutexUnlock(&screenLock);
-                        wrappedCondSignal(&cond_cv);
-                        break;
-                default:
-                        break;
-            }
-            /* Move player with the updated player's pos */
-            playerMove(p, prevRow, prevCol);
+                }
         }
     }
     if(p->lives == 0) {
@@ -223,7 +230,7 @@ void centipedeRun()
                 wrappedMutexInit(&screenLock, NULL);
 
                 /* Initialize player on the screen. startRow=20, startColumn=36, lives=4 */
-                player *p = spawnPlayer(PLAYER_START_ROW, PLAYER_START_COL, 1, &screenLock, &cond_cv);
+                player *p = spawnPlayer(PLAYER_START_ROW, PLAYER_START_COL, PLAYER_INIT_LIVES, &screenLock, &cond_cv);
 
                 /* Initialize the spawn thread on the screen. startRow=0, startColumn=80 */
                 wrappedPthreadCreate(&(spawn_thread), NULL, runSpawnThread, (void*)p);
