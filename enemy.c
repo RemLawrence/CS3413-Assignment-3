@@ -102,7 +102,7 @@ void *runEnemy(void *data) {
         if(e->length <= ENEMY_MIN_WIDTH) {
             e->isDead = true;
             /* TODO */
-            deleteEnemy(e);
+            //deleteEnemy(e);
             pthread_exit(NULL);
         }
 

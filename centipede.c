@@ -223,7 +223,7 @@ void centipedeRun()
                 wrappedMutexInit(&screenLock, NULL);
 
                 /* Initialize player on the screen. startRow=20, startColumn=36, lives=4 */
-                player *p = spawnPlayer(PLAYER_START_ROW, PLAYER_START_COL, PLAYER_INIT_LIVES, &screenLock, &cond_cv);
+                player *p = spawnPlayer(PLAYER_START_ROW, PLAYER_START_COL, 1, &screenLock, &cond_cv);
 
                 /* Initialize the spawn thread on the screen. startRow=0, startColumn=80 */
                 wrappedPthreadCreate(&(spawn_thread), NULL, runSpawnThread, (void*)p);

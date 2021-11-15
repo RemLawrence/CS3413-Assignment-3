@@ -42,13 +42,8 @@ void *runUpkeep(void *data) {
         sleepTicks(1); // This sleep tick is for if upkeep thread running faster than the spawn enemy thread, preventing automatic wins at the beginning of the game.
         /* TODO: Regularly check if there is no enemy left */
         enemyNode *enemyList = getEnemyQueue();
-        bool gameover = true;
-        while(enemyList != NULL){
-            if(!enemyList->e->isDead) {
-                gameover = false;
-                break;
-            }
-            enemyList = enemyList-> next;
+        if(enemyList == NULL){
+            p->state = GAMEOVER;
         }
 
         /* TODO: When the player is shot, remove all the bullets on the screen. */
@@ -71,7 +66,6 @@ void *runUpkeep(void *data) {
                 }
                 bulletList = bulletList -> next;
             }
-            
         }
     }
     pthread_exit(NULL);
