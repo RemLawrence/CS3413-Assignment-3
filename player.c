@@ -13,6 +13,7 @@
 #include <curses.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 //sample player graphic, 3 tile animation.
 //feel free to use this or make your own
@@ -70,6 +71,11 @@ void playerMove(player *f, int dRow, int dCol) {
 player* spawnPlayer(int startRow, int startCol, int lives, pthread_mutex_t *screenLock, pthread_cond_t *cond_cv)
 {
     player* p = (player*)(malloc(sizeof(player)));
+	/* error checking */
+    if (p == NULL) {
+        fprintf(stderr, "Fatal: failed to allocate %zu bytes.\n", sizeof(player));
+        abort();
+    }
 	p->lives = lives;
 	p->score = 0;
 	p->startCol = startCol;

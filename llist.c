@@ -16,6 +16,11 @@ void spawnEnemy(int startRow, int startCol, int length, char* direction, bool sp
 {   
     while(p->running && p->lives > 0) {
         enemy* e = (enemy*)(malloc(sizeof(enemy)));
+        /* error checking */
+        if (e == NULL) {
+            fprintf(stderr, "Fatal: failed to allocate %zu bytes.\n", sizeof(enemy));
+            abort();
+        }
         e->startCol = startCol; // Initialize the enemy's startCol to the upper left of the console (78)
         e->startRow = startRow; // Initialize the enemy's startRow to the upper left of the console (2)
 
@@ -36,7 +41,7 @@ void spawnEnemy(int startRow, int startCol, int length, char* direction, bool sp
         wrappedPthreadCreate(&(e->thread), NULL, runEnemy, (void*)e);
 
         /* If the enemy's length < 5, then it will die and thread will exit */
-        if(e->length <= 4) {
+        if(e->length <= ENEMY_MIN_WIDTH) {
             break;
         }
         else {
@@ -51,7 +56,7 @@ void spawnEnemy(int startRow, int startCol, int length, char* direction, bool sp
 
         /* If this method is called by the spawn thread, it has the responsibility to spawn new enemy with length=80 */
         if(spawn) {
-            sleepTicks(rand() % (10000 + 1 - 8000) + 8000); // Generate a new enemy randomly between ticks 8000-10000
+            sleepTicks(rand() % (MAX_SPAWN_TICK + 1 - MIN_SPAWN_TICK) + MIN_SPAWN_TICK); // Generate a new enemy randomly between ticks 8000-10000
         }
         else {
             /* If this method is not called by the spawn thread, it just spawns one enemy */
@@ -62,6 +67,11 @@ void spawnEnemy(int startRow, int startCol, int length, char* direction, bool sp
 
 enemyNode* createEnemyQueue(enemy *e) {
     enemyNode *newEnemyQueue = (enemyNode*)malloc(sizeof(enemyNode));
+    /* error checking */
+    if (newEnemyQueue == NULL) {
+        fprintf(stderr, "Fatal: failed to allocate %zu bytes.\n", sizeof(enemyNode));
+        abort();
+    }
     //wrappedMutexLock(&enemyListLock);
     newEnemyQueue->e = e;
     newEnemyQueue->next = NULL;
@@ -101,8 +111,12 @@ enemyNode* getEnemyQueue() {
 
 void spawnEnemyBullet(int startRow, int startCol, player *p, pthread_mutex_t *screenLock)
 {
-    
     enemyBullet* eb = (enemyBullet*)(malloc(sizeof(enemyBullet)));
+    /* error checking */
+    if (eb == NULL) {
+        fprintf(stderr, "Fatal: failed to allocate %zu bytes.\n", sizeof(enemyBullet));
+        abort();
+    }
 	eb->startCol = startCol;
 	eb->startRow = startRow;
 	eb->mutex = screenLock;
@@ -130,6 +144,11 @@ void spawnPlayerBullet(int startRow, int startCol, player *p, pthread_mutex_t *s
 {
     //wrappedMutexInit(&bulletListLock, NULL); // Initialize bulletListLock
     playerBullet* pb = (playerBullet*)(malloc(sizeof(playerBullet)));
+    /* error checking */
+    if (pb == NULL) {
+        fprintf(stderr, "Fatal: failed to allocate %zu bytes.\n", sizeof(playerBullet));
+        abort();
+    }
 	pb->startCol = startCol;
 	pb->startRow = startRow;
 	pb->mutex = screenLock;
@@ -151,6 +170,11 @@ void spawnPlayerBullet(int startRow, int startCol, player *p, pthread_mutex_t *s
 
 BulletNode* createBulletQueue(playerBullet *pb, enemyBullet *eb) {
     BulletNode *newBulletQueue = (BulletNode*)malloc(sizeof(BulletNode));
+    /* error checking */
+    if (newBulletQueue == NULL) {
+        fprintf(stderr, "Fatal: failed to allocate %zu bytes.\n", sizeof(BulletNode));
+        abort();
+    }
     //wrappedMutexLock(&bulletListLock);
     newBulletQueue->pb = pb;
     newBulletQueue->eb = eb;

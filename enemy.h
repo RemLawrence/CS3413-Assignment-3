@@ -5,6 +5,7 @@
 #define ENEMY_WIDTH 80
 #define ENEMY_BODY_ANIM_TILES 4 
 #define NUM_THREADS 1
+#define ENEMY_MIN_WIDTH 4
 
 #define LOWER_ROW_BOUNDARY 14
 #define COL_BOUNDARY 80

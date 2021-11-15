@@ -8,8 +8,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-
-
 /********************support functions****************/
 /* reset the enemy state to start */
 void newEnemy(enemy *e) 
@@ -72,7 +70,7 @@ void *runEnemy(void *data) {
         e->animTile++;
 		e->animTile %= ENEMY_BODY_ANIM_TILES;
         /* If the enemy's length < 5, then it will die and thread will exit */
-        if(e->length <= 4) {
+        if(e->length <= ENEMY_MIN_WIDTH) {
             e->isDead = true;
             //deleteEnemy(e);
             pthread_exit(NULL);
@@ -80,7 +78,7 @@ void *runEnemy(void *data) {
 
         char** tile_left = ENEMY_BODY_LEFT[e->animTile];
         char** tile_right = ENEMY_BODY_RIGHT[e->animTile];
-        char tempArray[2][e->length+1];
+        char tempArray[ENEMY_HEIGHT][e->length+1];
 
         if(e->length != ENEMY_WIDTH) {
             /* The enemy is hit and needs to have the anim tiles cut off. */
@@ -88,7 +86,7 @@ void *runEnemy(void *data) {
             int height_index = 0;
             int width_index = 0;
             for(height_index = 0; height_index < ENEMY_HEIGHT; height_index++) {
-                char body_right[2][81]={"0","0"};
+                char body_right[ENEMY_HEIGHT][ENEMY_WIDTH+1]={"0","0"};
                 int z = 0;
                 for (width_index = 0; width_index < e->length; width_index++) {
                     body_right[height_index][z] = tile_left[height_index][width_index];
@@ -108,7 +106,7 @@ void *runEnemy(void *data) {
             height_index = 0;
             width_index = 0;
             for(height_index = 0; height_index < ENEMY_HEIGHT; height_index++) {
-                char body_left[2][81];
+                char body_left[ENEMY_HEIGHT][ENEMY_WIDTH+1];
                 for (width_index = 0; width_index < e->length; width_index++) {
                     body_left[height_index][width_index] = tile_left[height_index][width_index];
                 }
@@ -160,7 +158,7 @@ void *runEnemy(void *data) {
             srand(time(NULL));   // Initialization, should only be called once.
             if(rand()%10 == 0) {
                 // Returns a pseudo-random integer between 0 and RAND_MAX.
-                //spawnEnemyBullet(e->row+1, e->col, e->p, e->mutex);
+                spawnEnemyBullet(e->row+1, e->col, e->p, e->mutex);
             }
 
             if(j >= COL_BOUNDARY) {
@@ -218,7 +216,7 @@ void *runEnemy(void *data) {
             srand(time(NULL));   // Initialization, should only be called once.
             if(rand()%10 == 0) {
                 // Returns a pseudo-random integer between 0 and RAND_MAX.
-                //spawnEnemyBullet(e->row+2, e->col, e->p, e->mutex);
+                spawnEnemyBullet(e->row+2, e->col, e->p, e->mutex);
             }  
             
             if(e->col <= 0) {

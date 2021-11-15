@@ -6,6 +6,10 @@
 #include "bullet.h"
 #include "threadwrappers.h"
 
+#define ENEMY_MIN_WIDTH 4
+#define MIN_SPAWN_TICK 8000
+#define MAX_SPAWN_TICK 10000
+
 // A Linked List
 typedef struct node
 {
