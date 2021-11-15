@@ -20,6 +20,7 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <sys/select.h>
+#include <time.h>
 
 
 //all these constants and gameboard should probably go in a constants file...hint hint
@@ -88,6 +89,8 @@ void *runKeyboard(void* data) {
     /* Pass the reference to the player p */
     player* p = (player*)data;
 
+    clock_t start; /* The start timer for cauculating player fire ticks */
+
     while(p->running && p->lives > 0) {
         fd_set rfds;
         struct timeval tv;
@@ -152,7 +155,13 @@ void *runKeyboard(void* data) {
                                         break;
                                 case SPACE_PREESSED:
                                         /* Shoot player bullet from its head */
-                                        spawnPlayerBullet(p->row-1, p->col+2, p, &screenLock);
+                                        if((int)(clock() - start) <= 8000){
+                                                /* If since the last time player fired, it has not been 8000 ticks, then don't fire again */
+                                        }
+                                        else {
+                                                spawnPlayerBullet(p->row-1, p->col+2, p, &screenLock);
+                                                start = clock();
+                                        }
                                         break;
                                 case KEY_Q_PREESSED:
                                         wrappedMutexLock(&screenLock);

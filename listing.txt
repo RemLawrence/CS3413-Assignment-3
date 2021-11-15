@@ -98,6 +98,7 @@ void *runPlayerBullet(void *data);
 
 #define ENEMY_HEIGHT 2
 #define ENEMY_WIDTH 80
+#define ENEMY_SPEED 40
 
 #define PLAYER_START_ROW 20
 #define PLAYER_START_COL 36
@@ -428,7 +429,7 @@ typedef struct nod
     struct nod *next;
 } BulletNode;
 
-void spawnEnemy(int startRow, int startCol, int length, char* direction, bool spawn, player *p, pthread_mutex_t *screenLock);
+void spawnEnemy(int startRow, int startCol, int length, int speed, char* direction, bool spawn, player *p, pthread_mutex_t *screenLock);
 struct node* createEnemyQueue(enemy *e);
 void insertEnemyQueue(enemy *e, enemyNode *enemyQueue);
 void deleteEnemy(enemy *e);
@@ -661,7 +662,7 @@ void *runPlayerBullet(void *data) {
                     enemyList->e->length = pb->col - enemyList->e->col; // Update previous enemy's length
                     enemyList->e->isHit = true;
                     /* Spawn new caterpiller based on its new position and new length, inherits the direction from another caterpiller, though. */
-                    spawnEnemy(enemyList->e->row, pb->col+3, length-(pb->col - enemyList->e->col), enemyList->e->direction, false, pb->p, pb->mutex); // Spawn a new enemy on the pb cut
+                    spawnEnemy(enemyList->e->row, pb->col+3, length-(pb->col - enemyList->e->col), enemyList->e->speed, enemyList->e->direction, false, pb->p, pb->mutex); // Spawn a new enemy on the pb cut
                     pb->isDead = true; // Turn the isDead flag on for the previous enemy to speed up
 
                     //wrappedMutexLock(pb->llist);
@@ -676,7 +677,7 @@ void *runPlayerBullet(void *data) {
                     pb->p->score = pb->p->score + 20; // Centipede's been hit, update player's score.
                     enemyList->e->isHit = true;
                     /* Spawn new caterpiller based on its new position and new length, inherits the direction from another caterpiller, though. */
-                    spawnEnemy(enemyList->e->row, pb->col-2, enemyList->e->length-(enemyList->e->col - pb->col), enemyList->e->direction, false, pb->p, pb->mutex);
+                    spawnEnemy(enemyList->e->row, pb->col-2, enemyList->e->length-(enemyList->e->col - pb->col), enemyList->e->speed, enemyList->e->direction, false, pb->p, pb->mutex);
                     enemyList->e->length = enemyList->e->col - pb->col; // Update previous enemy's length
                     pb->isDead = true; // Turn the isDead flag on for the previous enemy to speed up
                     //wrappedMutexLock(pb->llist);
@@ -733,6 +734,7 @@ void *runPlayerBullet(void *data) {
 #include <pthread.h>
 #include <stdio.h>
 #include <sys/select.h>
+#include <time.h>
 
 
 //all these constants and gameboard should probably go in a constants file...hint hint
@@ -801,81 +803,97 @@ void *runKeyboard(void* data) {
     /* Pass the reference to the player p */
     player* p = (player*)data;
 
-    fd_set rfds;
-    struct timeval tv;
-    int retval;
-
-    /* Watch stdin (fd 0 to see when it has input. */
-    FD_ZERO(&rfds);
-    FD_SET(0, &rfds);
-
-    /* Wait up to 1 seconds. */
-    tv.tv_sec = 1;
-    tv.tv_usec = 0;
+    clock_t start; /* The start timer for cauculating player fire ticks */
 
     while(p->running && p->lives > 0) {
+        fd_set rfds;
+        struct timeval tv;
+        int retval;
+
+        /* Watch stdin (fd 0 to see when it has input. */
+        FD_ZERO(&rfds);
+        FD_SET(0, &rfds);
+
+        /* Wait up to 1 seconds. */
+        tv.tv_sec = 1;
+        tv.tv_usec = 0;
+
         retval = select(1, &rfds, NULL, NULL, &tv);
+
         if (retval == -1) {
             perror("select()");
             exit(EXIT_FAILURE);
         }
-        else {
-            if(p->state == DEAD) {
-                /* Disable the keyboard input for 1s if the player being shot */
-                sleep(1);
-            }
-            /* FD_ISSET(0, &rfds) is true so input is available now. */
-            char input;
-            /* Get input from the keyboard */
-            input = getchar(); // TODO: NO, THIS IS NOT PERFECT, GAME STILL WAITING FOR THIS
+        else{
+                /* If timeout (retval == 0), check if the game ends and stop always blocking on getchar() */
+                if(p->running && p->lives > 0) {
+                        if(p->state == DEAD) {
+                                /* Disable the keyboard input for 1s if the player being shot */
+                                sleep(1);
+                        }
+                        /* FD_ISSET(0, &rfds) is true so input is available now. */
+                        char input;
+                        /* Get input from the keyboard */
+                        input = getchar();
 
-            int prevRow = p->row;
-            int prevCol = p->col;
+                        int prevRow = p->row;
+                        int prevCol = p->col;
 
-            switch(input) {
-                case KEY_W_PREESSED:
-                        /* Player going up 1 row */
-                        if(p->row > PLAYER_BOUNDARY_ROW) {
-                                /* Update player's pos */
-                                p->row = p->row - 1;
+                        switch(input) {
+                                case KEY_W_PREESSED:
+                                        /* Player going up 1 row */
+                                        if(p->row > PLAYER_BOUNDARY_ROW) {
+                                                /* Update player's pos */
+                                                p->row = p->row - 1;
+                                        }
+                                        break;
+                                case KEY_A_PREESSED:
+                                        /* Player going left 1 col */
+                                        if(p->col > 0) {
+                                                p->col = p->col - 1;
+                                        }
+                                        break;
+                                case KEY_S_PREESSED:
+                                        /* Player going down 1 row */
+                                        if(p->row < GAME_ROWS-PLAYER_HEIGHT) {
+                                                /* Update player's pos */
+                                                p->row = p->row + 1;
+                                        }
+                                        break;
+                                case KEY_D_PREESSED:
+                                        /* Player going up 1 row */
+                                        if(p->col < GAME_COLS-PLAYER_WIDTH) {
+                                                /* Update player's pos */
+                                                p->col = p->col + 1;
+                                        }
+                                        break;
+                                case SPACE_PREESSED:
+                                        /* Shoot player bullet from its head */
+                                        if((int)(clock() - start) <= 8000){
+                                                /* If since the last time player fired, it has not been 8000 ticks, then don't fire again */
+                                        }
+                                        else {
+                                                spawnPlayerBullet(p->row-1, p->col+2, p, &screenLock);
+                                                start = clock();
+                                        }
+                                        break;
+                                case KEY_Q_PREESSED:
+                                        wrappedMutexLock(&screenLock);
+                                        /* Put the quitter banner onto the screen if 'Q' being pressed */
+                                        putBanner("quitter....");
+                                        wrappedMutexUnlock(&screenLock);
+                                        wrappedCondSignal(&cond_cv);
+                                        break;
+                                default:
+                                        break;
                         }
+                        /* Move player with the updated player's pos */
+                        playerMove(p, prevRow, prevCol);
+                }
+                else {
+                        /* If the game ends (player->lives == 0), then jumps out of the keyboard thread and do cleanup */
                         break;
-                case KEY_A_PREESSED:
-                        /* Player going left 1 col */
-                        if(p->col > 0) {
-                                p->col = p->col - 1;
-                        }
-                        break;
-                case KEY_S_PREESSED:
-                        /* Player going down 1 row */
-                        if(p->row < GAME_ROWS-PLAYER_HEIGHT) {
-                                /* Update player's pos */
-                                p->row = p->row + 1;
-                        }
-                        break;
-                case KEY_D_PREESSED:
-                        /* Player going up 1 row */
-                        if(p->col < GAME_COLS-PLAYER_WIDTH) {
-                                /* Update player's pos */
-                                p->col = p->col + 1;
-                        }
-                        break;
-                case SPACE_PREESSED:
-                        /* Shoot player bullet from its head */
-                        spawnPlayerBullet(p->row-1, p->col+2, p, &screenLock);
-                        break;
-                case KEY_Q_PREESSED:
-                        wrappedMutexLock(&screenLock);
-                        /* Put the quitter banner onto the screen if 'Q' being pressed */
-                        putBanner("quitter....");
-                        wrappedMutexUnlock(&screenLock);
-                        wrappedCondSignal(&cond_cv);
-                        break;
-                default:
-                        break;
-            }
-            /* Move player with the updated player's pos */
-            playerMove(p, prevRow, prevCol);
+                }
         }
     }
     if(p->lives == 0) {
@@ -916,7 +934,7 @@ void *runConsoleRefresh(void *data) {
 void *runSpawnThread(void *data) {
         player* p = (player*)data;
         /* Spawn 1 enemy for now. It starts from the upper right corner with the direction left */
-        spawnEnemy(ENEMY_HEIGHT, ENEMY_WIDTH, ENEMY_WIDTH, "left", true, p, &screenLock);
+        spawnEnemy(ENEMY_HEIGHT, ENEMY_WIDTH, ENEMY_WIDTH, ENEMY_SPEED, "left", true, p, &screenLock);
         pthread_exit(NULL);
 }
 
@@ -1320,7 +1338,7 @@ void *runEnemy(void *data) {
         if(e->length <= ENEMY_MIN_WIDTH) {
             e->isDead = true;
             /* TODO */
-            deleteEnemy(e);
+            //deleteEnemy(e);
             pthread_exit(NULL);
         }
 
@@ -1521,11 +1539,11 @@ void *runEnemy(void *data) {
 
         if(e->isHit) {
             /* Catch the isHit signal from player bullet thread, consume it by increasing the speed of this enemy. */
-            if(e->speed == ENEMY_SPEED/2) {
+            if(e->speed == ENEMY_SPEED/4) {
                 
             }
             else {
-                /* Maximum speed: 40/2 */
+                /* Maximum speed: 40/4 */
                 e->speed = e->speed/2;
             }
             e->isHit = false; // Turn off the hit flag
@@ -1578,13 +1596,8 @@ void *runUpkeep(void *data) {
         sleepTicks(1); // This sleep tick is for if upkeep thread running faster than the spawn enemy thread, preventing automatic wins at the beginning of the game.
         /* TODO: Regularly check if there is no enemy left */
         enemyNode *enemyList = getEnemyQueue();
-        bool gameover = true;
-        while(enemyList != NULL){
-            if(!enemyList->e->isDead) {
-                gameover = false;
-                break;
-            }
-            enemyList = enemyList-> next;
+        if(enemyList == NULL){
+            p->state = GAMEOVER;
         }
 
         /* TODO: When the player is shot, remove all the bullets on the screen. */
@@ -1607,7 +1620,6 @@ void *runUpkeep(void *data) {
                 }
                 bulletList = bulletList -> next;
             }
-            
         }
     }
     pthread_exit(NULL);
@@ -1645,7 +1657,7 @@ pthread_mutex_t enemyListLock;
     thread. Scheduling spawning new enemies and also create small
     ones after the original big caterpiller's being hit. 
  **********************************************************/
-void spawnEnemy(int startRow, int startCol, int length, char* direction, bool spawn, player *p, pthread_mutex_t *screenLock)
+void spawnEnemy(int startRow, int startCol, int length, int speed, char* direction, bool spawn, player *p, pthread_mutex_t *screenLock)
 {   
     while(p->running && p->lives > 0) {
         enemy* e = (enemy*)(malloc(sizeof(enemy)));
@@ -1660,7 +1672,7 @@ void spawnEnemy(int startRow, int startCol, int length, char* direction, bool sp
         e->isHit = false;
         e->direction = direction;
         e->length = length; // Length of the enemy body. Could be deducted when hit!
-        e->speed = ENEMY_SPEED; // Initialize the enemy speed to 40
+        e->speed = speed; // Initialize the enemy speed to 40
         e->mutex = screenLock; // A reference to the screenlock
         e->p = p; // A reference to the player
 
@@ -1734,13 +1746,36 @@ void insertEnemyQueue(enemy *e, enemyNode *enemyQueue) {
     Linked List.
  **********************************************************/
 void deleteEnemy(enemy *e) {
-    while(enemyQueue != NULL) {
-        if(enemyQueue->e->isDead) {
-            pthread_cancel(e->thread);
-            wrappedPthreadJoin(e->thread, NULL);
-            free(e);
+    if(enemyQueue->e->thread == e->thread) {
+        if(enemyQueue->next == NULL) {
+            wrappedMutexLock(&enemyListLock);
+            enemyQueue = NULL;
+            wrappedMutexUnlock(&enemyListLock);
         }
-        enemyQueue = enemyQueue -> next;
+        else {
+            wrappedMutexLock(&enemyListLock);
+            enemyQueue = enemyQueue->next;
+            wrappedMutexUnlock(&enemyListLock);
+        }
+        wrappedMutexLock(&enemyListLock);
+        pthread_cancel(e->thread);
+        wrappedPthreadJoin(e->thread, NULL);
+        free(e);
+        wrappedMutexUnlock(&enemyListLock);
+    }
+    else {
+        while(enemyQueue->next != NULL) {
+            if(enemyQueue->next->e->thread == e->thread) {
+                wrappedMutexLock(&enemyListLock);
+                enemyQueue->next = enemyQueue->next->next;
+
+                pthread_cancel(e->thread);
+                wrappedPthreadJoin(e->thread, NULL);
+                free(e);
+                wrappedMutexUnlock(&enemyListLock);
+                break;
+            }
+        }
     }
 }
 
