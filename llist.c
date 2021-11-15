@@ -124,7 +124,7 @@ void deleteEnemy(enemy *e) {
     while(enemyQueue != NULL) {
         if(enemyQueue->e->isDead) {
             pthread_cancel(e->thread);
-            pthread_join(e->thread, NULL);
+            wrappedPthreadJoin(e->thread, NULL);
             free(e);
         }
         enemyQueue = enemyQueue -> next;
@@ -256,7 +256,7 @@ void deleteBullet(playerBullet *pb, enemyBullet *eb) {
             if(bulletQueue->pb != NULL) {
                 if(bulletQueue->pb->isDead) {
                     pthread_cancel(pb->thread);
-                    pthread_join(pb->thread, NULL);
+                    wrappedPthreadJoin(pb->thread, NULL);
                     free(pb);
                 }
             }
@@ -269,7 +269,7 @@ void deleteBullet(playerBullet *pb, enemyBullet *eb) {
             if(bulletQueue->eb != NULL) {
                 if(bulletQueue->eb->isDead) {
                     pthread_cancel(eb->thread);
-                    pthread_join(eb->thread, NULL);
+                    wrappedPthreadJoin(eb->thread, NULL);
                     free(eb);
                 }
             }

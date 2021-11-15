@@ -273,20 +273,20 @@ void cleanUp(player *p) {
         p->running = false;
 
         pthread_cancel(p->thread);
-        pthread_join(p->thread, NULL); // Join the only player thread
+        wrappedPthreadJoin(p->thread, NULL); // Join the only player thread
         pthread_cancel(keyboard_thread);
-        pthread_join(keyboard_thread, NULL); // Join the only keyboard thread
+        wrappedPthreadJoin(keyboard_thread, NULL); // Join the only keyboard thread
         pthread_cancel(refresh_thread);
-        pthread_join(refresh_thread, NULL); // Join the only refresh thread
+        wrappedPthreadJoin(refresh_thread, NULL); // Join the only refresh thread
         pthread_cancel(upkeep_thread);
-        pthread_join(upkeep_thread, NULL); // Join the only upkeep thread
+        wrappedPthreadJoin(upkeep_thread, NULL); // Join the only upkeep thread
         pthread_cancel(spawn_thread);
-        pthread_join(spawn_thread, NULL); // Join the only spawn thread
+        wrappedPthreadJoin(spawn_thread, NULL); // Join the only spawn thread
 
         enemyNode *enemyList = getEnemyQueue();
         while(enemyList != NULL) {
                 pthread_cancel(enemyList->e->thread);
-                pthread_join(enemyList->e->thread, NULL);
+                wrappedPthreadJoin(enemyList->e->thread, NULL);
                 free(enemyList->e);
                 enemyList = enemyList -> next;
         }
@@ -295,12 +295,12 @@ void cleanUp(player *p) {
         while(bulletList != NULL) {
                 if(bulletList->eb != NULL) {
                         pthread_cancel(bulletList->eb->thread);
-                        pthread_join(bulletList->eb->thread, NULL);
+                        wrappedPthreadJoin(bulletList->eb->thread, NULL);
                         free(bulletList->eb);
                 }
                 else if(bulletList->pb != NULL) {
                         pthread_cancel(bulletList->pb->thread);
-                        pthread_join(bulletList->pb->thread, NULL);
+                        wrappedPthreadJoin(bulletList->pb->thread, NULL);
                         free(bulletList->pb);
                 }
                 bulletList = bulletList -> next;
