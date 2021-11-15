@@ -88,25 +88,26 @@ void *runKeyboard(void* data) {
     /* Pass the reference to the player p */
     player* p = (player*)data;
 
-    fd_set rfds;
-    struct timeval tv;
-    int retval;
-
-    /* Watch stdin (fd 0 to see when it has input. */
-    FD_ZERO(&rfds);
-    FD_SET(0, &rfds);
-
-    /* Wait up to 1 seconds. */
-    tv.tv_sec = 1;
-    tv.tv_usec = 0;
-
     while(p->running && p->lives > 0) {
+        fd_set rfds;
+        struct timeval tv;
+        int retval;
+
+        /* Watch stdin (fd 0 to see when it has input. */
+        FD_ZERO(&rfds);
+        FD_SET(0, &rfds);
+
+        /* Wait up to 1 seconds. */
+        tv.tv_sec = 1;
+        tv.tv_usec = 0;
+
         retval = select(1, &rfds, NULL, NULL, &tv);
+
         if (retval == -1) {
             perror("select()");
             exit(EXIT_FAILURE);
         }
-        else {
+        else{
                 /* If timeout (retval == 0), check if the game ends and stop always blocking on getchar() */
                 if(p->running && p->lives > 0) {
                         if(p->state == DEAD) {
