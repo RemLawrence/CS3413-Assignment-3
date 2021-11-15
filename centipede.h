@@ -28,6 +28,7 @@
 
 #define ENEMY_HEIGHT 2
 #define ENEMY_WIDTH 80
+#define ENEMY_SPEED 40
 
 #define PLAYER_START_ROW 20
 #define PLAYER_START_COL 36

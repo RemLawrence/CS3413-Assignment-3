@@ -211,7 +211,7 @@ void *runConsoleRefresh(void *data) {
 void *runSpawnThread(void *data) {
         player* p = (player*)data;
         /* Spawn 1 enemy for now. It starts from the upper right corner with the direction left */
-        spawnEnemy(ENEMY_HEIGHT, ENEMY_WIDTH, ENEMY_WIDTH, "left", true, p, &screenLock);
+        spawnEnemy(ENEMY_HEIGHT, ENEMY_WIDTH, ENEMY_WIDTH, ENEMY_SPEED, "left", true, p, &screenLock);
         pthread_exit(NULL);
 }
 

@@ -303,11 +303,11 @@ void *runEnemy(void *data) {
 
         if(e->isHit) {
             /* Catch the isHit signal from player bullet thread, consume it by increasing the speed of this enemy. */
-            if(e->speed == ENEMY_SPEED/2) {
+            if(e->speed == ENEMY_SPEED/4) {
                 
             }
             else {
-                /* Maximum speed: 40/2 */
+                /* Maximum speed: 40/4 */
                 e->speed = e->speed/2;
             }
             e->isHit = false; // Turn off the hit flag

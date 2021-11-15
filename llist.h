@@ -35,7 +35,7 @@ typedef struct nod
     struct nod *next;
 } BulletNode;
 
-void spawnEnemy(int startRow, int startCol, int length, char* direction, bool spawn, player *p, pthread_mutex_t *screenLock);
+void spawnEnemy(int startRow, int startCol, int length, int speed, char* direction, bool spawn, player *p, pthread_mutex_t *screenLock);
 struct node* createEnemyQueue(enemy *e);
 void insertEnemyQueue(enemy *e, enemyNode *enemyQueue);
 void deleteEnemy(enemy *e);

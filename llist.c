@@ -32,7 +32,7 @@ pthread_mutex_t enemyListLock;
     thread. Scheduling spawning new enemies and also create small
     ones after the original big caterpiller's being hit. 
  **********************************************************/
-void spawnEnemy(int startRow, int startCol, int length, char* direction, bool spawn, player *p, pthread_mutex_t *screenLock)
+void spawnEnemy(int startRow, int startCol, int length, int speed, char* direction, bool spawn, player *p, pthread_mutex_t *screenLock)
 {   
     while(p->running && p->lives > 0) {
         enemy* e = (enemy*)(malloc(sizeof(enemy)));
@@ -47,7 +47,7 @@ void spawnEnemy(int startRow, int startCol, int length, char* direction, bool sp
         e->isHit = false;
         e->direction = direction;
         e->length = length; // Length of the enemy body. Could be deducted when hit!
-        e->speed = ENEMY_SPEED; // Initialize the enemy speed to 40
+        e->speed = speed; // Initialize the enemy speed to 40
         e->mutex = screenLock; // A reference to the screenlock
         e->p = p; // A reference to the player
 
